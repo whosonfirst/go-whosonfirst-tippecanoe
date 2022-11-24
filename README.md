@@ -9,7 +9,13 @@ Documentation is incomplete at this time
 ## Example
 
 ```
-> go run -mod vendor cmd/features/main.go \
+$> go build -mod vendor -o bin/features cmd/features/main.go
+```
+
+Generate a MBTile database of all the records in a local checkout of the [sfomuseum-data-whosonfirst](https://github.com/sfomuseum-data/sfomuseum-data-whosonfirst) repository:
+
+```
+$> bin/features \
 	-writer-uri 'constant://?val=featurecollection://?writer=stdout://' \
 	/usr/local/data/sfomuseum-data-whosonfirst/ \
 	
@@ -38,8 +44,27 @@ tile 2/2/1 size is 584143 with detail 10, >500000
   99.9%  9/409/233  
 ```
 
+Generate a MBTile database of all the records from repositories in the [sfomuseum-data](https://github.com/sfomuseum-data) organization with a prefix of `sfomuseum-data-maps`:
+
+```
+$> ./bin/features \
+	-writer-uri 'constant://?val=featurecollection://?writer=stdout://' \
+	-iterator-uri 'org://tmp' \
+	'sfomuseum-data://?prefix=sfomuseum-data-maps' \
+	
+	| tippecanoe -zg -o sfomuseum.mbtiles
+	
+For layer 0, using name "sfomuseum"
+2022/11/23 18:57:25 time to index paths (1) 2.758176132s
+2022/11/23 18:57:25 time to index paths (1) 3.040810943s
+38 features, 2793 bytes of geometry, 5975 bytes of separate metadata, 13994 bytes of string pool
+Choosing a maxzoom of -z7 for features typically 4537 feet (1383 meters) apart, and at least 735 feet (224 meters) apart
+  99.9%  7/20/49
+```
+
 ## See also
 
 * https://github.com/whosonfirst/go-whosonfirst-iterwriter
+* https://github.com/whosonfirst/go-whosonfirst-iterate-organization/
 * https://github.com/whosonfirst/go-writer-featurecollection
 * https://github.com/felt/tippecanoe
