@@ -44,6 +44,16 @@ tile 2/2/1 size is 584143 with detail 10, >500000
   99.9%  9/409/233  
 ```
 
+To take advantage of parallel reads in `tippecanoe` use the [whosonfirst/go-writer-jsonl](https://github.com/whosonfirst/go-writer-jsonl) writer (instead of `featurecollection`). For example:
+
+```
+$> ./bin/features \
+	-writer-uri 'constant://?val=jsonl://?writer=stdout://' \
+	/usr/local/data/whosonfirst-data-admin-us \
+
+	| tippecanoe -P -zg -o us.mbtiles --drop-densest-as-needed
+```
+
 Generate a MBTile database of all the records from repositories in the [sfomuseum-data](https://github.com/sfomuseum-data) organization with a prefix of `sfomuseum-data-maps`:
 
 ```
@@ -67,4 +77,5 @@ Choosing a maxzoom of -z7 for features typically 4537 feet (1383 meters) apart, 
 * https://github.com/whosonfirst/go-whosonfirst-iterwriter
 * https://github.com/whosonfirst/go-whosonfirst-iterate-organization/
 * https://github.com/whosonfirst/go-writer-featurecollection
+* https://github.com/whosonfirst/go-writer-jsonl
 * https://github.com/felt/tippecanoe

@@ -6,6 +6,7 @@ require (
 	github.com/whosonfirst/go-whosonfirst-iterate-organization v1.1.0
 	github.com/whosonfirst/go-whosonfirst-iterwriter v0.0.6
 	github.com/whosonfirst/go-writer-featurecollection/v3 v3.0.0
+	github.com/whosonfirst/go-writer-jsonl/v3 v3.0.1
 )
 
 require (

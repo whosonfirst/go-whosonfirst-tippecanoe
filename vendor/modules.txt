@@ -336,6 +336,9 @@ github.com/whosonfirst/go-whosonfirst-uri
 # github.com/whosonfirst/go-writer-featurecollection/v3 v3.0.0
 ## explicit; go 1.18
 github.com/whosonfirst/go-writer-featurecollection/v3
+# github.com/whosonfirst/go-writer-jsonl/v3 v3.0.1
+## explicit; go 1.18
+github.com/whosonfirst/go-writer-jsonl/v3
 # github.com/whosonfirst/go-writer/v3 v3.1.0
 ## explicit; go 1.18
 github.com/whosonfirst/go-writer/v3
