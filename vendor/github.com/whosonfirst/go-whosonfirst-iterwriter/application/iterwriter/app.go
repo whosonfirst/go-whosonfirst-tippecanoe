@@ -15,12 +15,31 @@ import (
 	"time"
 )
 
+type RunOptions struct {
+	Logger       *log.Logger
+	FlagSet      *flag.FlagSet
+	CallbackFunc iterwriter.IterwriterCallbackFunc
+}
+
 func Run(ctx context.Context, logger *log.Logger) error {
 	fs := DefaultFlagSet()
 	return RunWithFlagSet(ctx, fs, logger)
 }
 
 func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) error {
+
+	opts := &RunOptions{
+		Logger:       logger,
+		FlagSet:      fs,
+		CallbackFunc: iterwriter.DefaultIterwriterCallback,
+	}
+
+	return RunWithOptions(ctx, opts)
+}
+
+func RunWithOptions(ctx context.Context, opts *RunOptions) error {
+
+	fs := opts.FlagSet
 
 	flagset.Parse(fs)
 
@@ -72,7 +91,9 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 	monitor.Start(ctx, os.Stdout)
 	defer monitor.Stop(ctx)
 
-	err = iterwriter.IterateWithWriter(ctx, mw, monitor, iterator_uri, iterator_paths...)
+	iter_cb := opts.CallbackFunc(mw, opts.Logger, monitor)
+
+	err = iterwriter.IterateWithWriterAndCallback(ctx, mw, iter_cb, monitor, iterator_uri, iterator_paths...)
 
 	if err != nil {
 		return fmt.Errorf("Failed to iterate with writer, %w", err)
