@@ -72,6 +72,33 @@ Choosing a maxzoom of -z7 for features typically 4537 feet (1383 meters) apart, 
   99.9%  7/20/49
 ```
 
+## Tools
+
+```
+$> make cli
+go build -mod vendor -o bin/features cmd/features/main.go
+```
+
+### features
+
+Emit features derived from a `whosonfirst/go-whosonfirst-iterator` instance as JSON-L or a GeoJSON FeatureCollection.
+
+```
+$> ./bin/features -h
+  -as-spr
+    	Replace Feature properties with Who's On First Standard Places Result (SPR) derived from that feature. (default true)
+  -include-alt-files
+    	Include alternate geometry files in output.
+  -iterator-uri string
+    	A valid whosonfirst/go-whosonfirst-iterate/v3 URI. (default "repo://")
+  -monitor-uri string
+    	A valid sfomuseum/go-timings URI. (default "counter://PT60S")
+  -require-polygons
+    	Require that geometry type be 'Polygon' or 'MultiPolygon' to be included in output.
+  -writer-uri value
+    	One or more valid whosonfirst/go-writer/v2 URIs, each encoded as a gocloud.dev/runtimevar URI.
+```
+
 ## See also
 
 * https://github.com/whosonfirst/go-whosonfirst-iterwriter
