@@ -2,7 +2,7 @@
 
 Go package to produce tippecanoe-compatible input using the `whosonfirst/go-whosonfirst-iterwriter` and `whosonfirst/go-writer-featurecollection` packages.
 
-## Documenation
+## Documentation
 
 Documentation is incomplete at this time
 
