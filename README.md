@@ -6,13 +6,34 @@ Go package to produce tippecanoe-compatible input using the `whosonfirst/go-whos
 
 Documentation is incomplete at this time
 
-## Example
+## Tools
 
 ```
-$> go build -mod vendor -o bin/features cmd/features/main.go
+$> make cli
+go build -mod vendor -o bin/features cmd/features/main.go
 ```
 
-### Local data
+### features
+
+Emit features derived from a `whosonfirst/go-whosonfirst-iterator` instance as JSON-L or a GeoJSON FeatureCollection.
+
+```
+$> ./bin/features -h
+  -as-spr
+    	Replace Feature properties with Who's On First Standard Places Result (SPR) derived from that feature. (default true)
+  -include-alt-files
+    	Include alternate geometry files in output.
+  -iterator-uri string
+    	A valid whosonfirst/go-whosonfirst-iterate/v3 URI. (default "repo://")
+  -monitor-uri string
+    	A valid sfomuseum/go-timings URI. (default "counter://PT60S")
+  -require-polygons
+    	Require that geometry type be 'Polygon' or 'MultiPolygon' to be included in output.
+  -writer-uri value
+    	One or more valid whosonfirst/go-writer/v2 URIs, each encoded as a gocloud.dev/runtimevar URI.
+```
+
+#### Local data
 
 Generate a MBTile database of all the records in a local checkout of the [sfomuseum-data-whosonfirst](https://github.com/sfomuseum-data/sfomuseum-data-whosonfirst) repository:
 
@@ -56,7 +77,7 @@ $> ./bin/features \
 	| tippecanoe -P -zg -o us.mbtiles --drop-densest-as-needed
 ```
 
-### Remote data
+#### Remote data
 
 Generate a MBTile database of all the records from repositories in the [sfomuseum-data](https://github.com/sfomuseum-data) organization with a prefix of `sfomuseum-data-maps`:
 
@@ -76,7 +97,7 @@ Choosing a maxzoom of -z7 for features typically 4537 feet (1383 meters) apart, 
   99.9%  7/20/49
 ```
 
-### Data for use with `whosonfirst/go-whosonfirst-spatial-pmtiles`
+#### Data for use with `whosonfirst/go-whosonfirst-spatial-pmtiles`
 
 To generate an MBTiles data suitable for converting to a Protomaps PMTiles database for use with the [whosonfirst/go-whosonfirst-spatial-pmtiles](https://github.com/whosonfirst/go-whosonfirst-spatial-pmtiles) package it is helpful to specify the `-require-polygons` and `-as-spr` flags. These will exclude features that don't have a geometry of type "Polygon" or "MultiPolygon" and replace they keys and values in a feature's `properties` element with a [Standard Place Result](https://github.com/whosonfirst/go-whosonfirst-spr) instance, respectively. This will greatly reduce the size of the final database.
 
@@ -97,32 +118,6 @@ $> du -h us.mbtiles
 
 Note: As of this writing the `go-whosonfirst-spatial-pmtiles` doesn't play well with alternate geometry features (which are included by specifying the `-include-alt-files` flag).
 
-## Tools
-
-```
-$> make cli
-go build -mod vendor -o bin/features cmd/features/main.go
-```
-
-### features
-
-Emit features derived from a `whosonfirst/go-whosonfirst-iterator` instance as JSON-L or a GeoJSON FeatureCollection.
-
-```
-$> ./bin/features -h
-  -as-spr
-    	Replace Feature properties with Who's On First Standard Places Result (SPR) derived from that feature. (default true)
-  -include-alt-files
-    	Include alternate geometry files in output.
-  -iterator-uri string
-    	A valid whosonfirst/go-whosonfirst-iterate/v3 URI. (default "repo://")
-  -monitor-uri string
-    	A valid sfomuseum/go-timings URI. (default "counter://PT60S")
-  -require-polygons
-    	Require that geometry type be 'Polygon' or 'MultiPolygon' to be included in output.
-  -writer-uri value
-    	One or more valid whosonfirst/go-writer/v2 URIs, each encoded as a gocloud.dev/runtimevar URI.
-```
 
 ## See also
 
