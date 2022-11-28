@@ -12,6 +12,8 @@ Documentation is incomplete at this time
 $> go build -mod vendor -o bin/features cmd/features/main.go
 ```
 
+### Local data
+
 Generate a MBTile database of all the records in a local checkout of the [sfomuseum-data-whosonfirst](https://github.com/sfomuseum-data/sfomuseum-data-whosonfirst) repository:
 
 ```
@@ -54,6 +56,8 @@ $> ./bin/features \
 	| tippecanoe -P -zg -o us.mbtiles --drop-densest-as-needed
 ```
 
+### Remote data
+
 Generate a MBTile database of all the records from repositories in the [sfomuseum-data](https://github.com/sfomuseum-data) organization with a prefix of `sfomuseum-data-maps`:
 
 ```
@@ -71,6 +75,27 @@ For layer 0, using name "sfomuseum"
 Choosing a maxzoom of -z7 for features typically 4537 feet (1383 meters) apart, and at least 735 feet (224 meters) apart
   99.9%  7/20/49
 ```
+
+### Data for use with `whosonfirst/go-whosonfirst-spatial-pmtiles`
+
+To generate an MBTiles data suitable for converting to a Protomaps PMTiles database for use with the [whosonfirst/go-whosonfirst-spatial-pmtiles](https://github.com/whosonfirst/go-whosonfirst-spatial-pmtiles) package it is helpful to specify the `-require-polygons` and `-as-spr` flags. These will exclude features that don't have a geometry of type "Polygon" or "MultiPolygon" and replace they keys and values in a feature's `properties` element with a [Standard Place Result](https://github.com/whosonfirst/go-whosonfirst-spr) instance, respectively. This will greatly reduce the size of the final database.
+
+Likewise, pass the `-pf` and `-pk` flags to `tippecanoe` to ensure no features are excluded from the MBTiles database. I also like to specify a fixed zoom level; 12 is usually a good balance between the number of features in a given tile and the total number of tiles.
+
+```
+$> ./bin/features \
+	-as-spr \
+	-require-polygons \
+	-writer-uri 'constant://?val=jsonl://?writer=stdout://' \
+	/usr/local/data/whosonfirst-data-admin-us/ \
+
+	| tippecanoe -P -z 12 -pf -pk -o us.mbtiles
+
+$> du -h us.mbtiles 
+608M	us.mbtiles
+```
+
+Note: As of this writing the `go-whosonfirst-spatial-pmtiles` doesn't play well with alternate geometry features (which are included by specifying the `-include-alt-files` flag).
 
 ## Tools
 
