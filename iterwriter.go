@@ -17,15 +17,15 @@ import (
 )
 
 type IterwriterCallbackFuncBuilderOptions struct {
-	RequirePolygon bool
-	AsSPR          bool
+	RequirePolygon  bool
+	AsSPR           bool
 	IncludeAltFiles bool
 }
 
 func IterwriterCallbackFuncBuilder(opts *IterwriterCallbackFuncBuilderOptions) iterwriter.IterwriterCallbackFunc {
 
 	// wr, logger, monitor are created in whosonfirst/go-whosonfirst-iterwriter/app/iterwriter
-	
+
 	iterwriter_cb := func(wr writer.Writer, logger *log.Logger, monitor timings.Monitor) emitter.EmitterCallbackFunc {
 
 		iter_cb := func(ctx context.Context, path string, r io.ReadSeeker, args ...interface{}) error {
@@ -84,7 +84,7 @@ func IterwriterCallbackFuncBuilder(opts *IterwriterCallbackFuncBuilderOptions) i
 				br := bytes.NewReader(body)
 				r = br
 			}
-			
+
 			_, err = wr.Write(ctx, rel_path, r)
 
 			if err != nil {
