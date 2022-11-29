@@ -84,7 +84,7 @@ Generate a MBTile database of all the records from repositories in the [sfomuseu
 ```
 $> ./bin/features \
 	-writer-uri 'constant://?val=featurecollection://?writer=stdout://' \
-	-iterator-uri 'org://tmp' \
+	-iterator-uri 'org:///tmp' \
 	'sfomuseum-data://?prefix=sfomuseum-data-maps' \
 	
 	| tippecanoe -zg -o sfomuseum.mbtiles
