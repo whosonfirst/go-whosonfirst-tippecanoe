@@ -20,6 +20,7 @@ type IterwriterCallbackFuncBuilderOptions struct {
 	RequirePolygon  bool
 	AsSPR           bool
 	IncludeAltFiles bool
+	Properties []string
 }
 
 func IterwriterCallbackFuncBuilder(opts *IterwriterCallbackFuncBuilderOptions) iterwriter.IterwriterCallbackFunc {
@@ -74,11 +75,14 @@ func IterwriterCallbackFuncBuilder(opts *IterwriterCallbackFuncBuilderOptions) i
 						return fmt.Errorf("Failed to create SPR for %s, %w", path, err)
 					}
 
+					// ideally use go-whosonfirst-spatial.PropertiesResponseResultsWithStandardPlacesResults here
+					// but not sure what the what is yet
+					
 					body, err = sjson.SetBytes(body, "properties", s)
 
 					if err != nil {
 						return fmt.Errorf("Failed to update properties for %s, %w", path, err)
-					}
+					}					
 				}
 
 				br := bytes.NewReader(body)
