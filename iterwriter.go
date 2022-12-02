@@ -18,10 +18,10 @@ import (
 )
 
 type IterwriterCallbackFuncBuilderOptions struct {
-	RequirePolygon   bool
-	AsSPR            bool
-	IncludeAltFiles  bool
-	AppendPropertiesToSPR []string
+	RequirePolygon      bool
+	AsSPR               bool
+	IncludeAltFiles     bool
+	AppendSPRProperties []string
 }
 
 func IterwriterCallbackFuncBuilder(opts *IterwriterCallbackFuncBuilderOptions) iterwriter.IterwriterCallbackFunc {
@@ -87,10 +87,11 @@ func IterwriterCallbackFuncBuilder(opts *IterwriterCallbackFuncBuilderOptions) i
 						return fmt.Errorf("Failed to update properties for %s, %w", path, err)
 					}
 
-					if len(opts.AppendPropertiesToSPR) > 0 {
+					if len(opts.AppendSPRProperties) > 0 {
 
-						for _, path := range opts.AppendPropertiesToSPR {
+						for _, path := range opts.AppendSPRProperties {
 
+							// Because we are deriving this from old_props and not body
 							rel_path := strings.Replace(path, "properties.", "", 1)
 
 							p_rsp := old_props.Get(rel_path)

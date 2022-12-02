@@ -20,9 +20,10 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 	flagset.Parse(fs)
 
 	cb_opts := &tippecanoe.IterwriterCallbackFuncBuilderOptions{
-		AsSPR:           as_spr,
-		RequirePolygon:  require_polygons,
-		IncludeAltFiles: include_alt_files,
+		AsSPR:               as_spr,
+		RequirePolygon:      require_polygons,
+		IncludeAltFiles:     include_alt_files,
+		AppendSPRProperties: spr_properties,
 	}
 
 	cb := tippecanoe.IterwriterCallbackFuncBuilder(cb_opts)
