@@ -29,6 +29,8 @@ $> ./bin/features -h
     	A valid sfomuseum/go-timings URI. (default "counter://PT60S")
   -require-polygons
     	Require that geometry type be 'Polygon' or 'MultiPolygon' to be included in output.
+  -spr-append-property value
+    	Zero or more properties in a given feature to append to SPR output
   -writer-uri value
     	One or more valid whosonfirst/go-writer/v2 URIs, each encoded as a gocloud.dev/runtimevar URI.
 ```
@@ -117,6 +119,20 @@ $> du -h us.mbtiles
 ```
 
 Note: As of this writing the `go-whosonfirst-spatial-pmtiles` doesn't play well with alternate geometry features (which are included by specifying the `-include-alt-files` flag).
+
+#### Appending addition properties to SPR output
+
+Pass zero or more `-spr-append-property` flags to append addition properties from a feature to SPR output. Paths may be relative or absolute. For example:
+
+```
+$> bin/features \
+	-as-spr \
+	-require-polygons \
+	-spr-append-property 'properties.src:geom' \
+	-spr-append-property wof:hierarchy \
+	-writer-uri 'constant://?val=featurecollection://?writer=stdout://' \
+	/usr/local/data/sfomuseum-data-architecture/
+```
 
 #### Filtering data
 

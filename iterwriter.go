@@ -14,12 +14,14 @@ import (
 	"github.com/whosonfirst/go-writer/v3"
 	"io"
 	"log"
+	"strings"
 )
 
 type IterwriterCallbackFuncBuilderOptions struct {
-	RequirePolygon  bool
-	AsSPR           bool
-	IncludeAltFiles bool
+	RequirePolygon      bool
+	AsSPR               bool
+	IncludeAltFiles     bool
+	AppendSPRProperties []string
 }
 
 func IterwriterCallbackFuncBuilder(opts *IterwriterCallbackFuncBuilderOptions) iterwriter.IterwriterCallbackFunc {
@@ -74,10 +76,38 @@ func IterwriterCallbackFuncBuilder(opts *IterwriterCallbackFuncBuilderOptions) i
 						return fmt.Errorf("Failed to create SPR for %s, %w", path, err)
 					}
 
+					// ideally use go-whosonfirst-spatial.PropertiesResponseResultsWithStandardPlacesResults here
+					// but not sure what the what is yet
+
+					old_props := gjson.GetBytes(body, "properties")
+
 					body, err = sjson.SetBytes(body, "properties", s)
 
 					if err != nil {
 						return fmt.Errorf("Failed to update properties for %s, %w", path, err)
+					}
+
+					if len(opts.AppendSPRProperties) > 0 {
+
+						for _, path := range opts.AppendSPRProperties {
+
+							// Because we are deriving this from old_props and not body
+							rel_path := strings.Replace(path, "properties.", "", 1)
+
+							p_rsp := old_props.Get(rel_path)
+
+							if p_rsp.Exists() {
+
+								abs_path := fmt.Sprintf("properties.%s", rel_path)
+
+								body, err = sjson.SetBytes(body, abs_path, p_rsp.Value())
+
+								if err != nil {
+									return fmt.Errorf("Failed to assign %s to properties, %w", abs_path, err)
+								}
+							}
+						}
+
 					}
 				}
 
