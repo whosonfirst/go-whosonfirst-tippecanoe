@@ -1,15 +1,16 @@
 module github.com/whosonfirst/go-whosonfirst-tippecanoe
 
-go 1.19
+go 1.18
 
 require (
+	github.com/sfomuseum/go-flags v0.10.0
 	github.com/sfomuseum/go-timings v1.2.1
-	github.com/tidwall/gjson v1.14.3
+	github.com/tidwall/gjson v1.14.4
 	github.com/tidwall/sjson v1.2.5
 	github.com/whosonfirst/go-whosonfirst-iterate-organization v1.1.0
 	github.com/whosonfirst/go-whosonfirst-iterate/v2 v2.3.1
-	github.com/whosonfirst/go-whosonfirst-iterwriter v0.0.7
-	github.com/whosonfirst/go-whosonfirst-spr/v2 v2.3.2
+	github.com/whosonfirst/go-whosonfirst-iterwriter v0.0.9
+	github.com/whosonfirst/go-whosonfirst-spr/v2 v2.3.3
 	github.com/whosonfirst/go-whosonfirst-uri v1.2.0
 	github.com/whosonfirst/go-writer-featurecollection/v3 v3.0.0
 	github.com/whosonfirst/go-writer-jsonl/v3 v3.0.1
@@ -19,12 +20,12 @@ require (
 require (
 	github.com/Microsoft/go-winio v0.5.1 // indirect
 	github.com/ProtonMail/go-crypto v0.0.0-20210428141323-04723f9f07d7 // indirect
-	github.com/aaronland/go-aws-session v0.0.6 // indirect
+	github.com/aaronland/go-aws-session v0.1.0 // indirect
 	github.com/aaronland/go-json-query v0.1.3 // indirect
 	github.com/aaronland/go-roster v1.0.0 // indirect
-	github.com/aaronland/go-string v0.1.2 // indirect
+	github.com/aaronland/go-string v1.0.0 // indirect
 	github.com/acomagu/bufpipe v1.0.3 // indirect
-	github.com/aws/aws-sdk-go v1.44.68 // indirect
+	github.com/aws/aws-sdk-go v1.44.163 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.16.8 // indirect
 	github.com/aws/aws-sdk-go-v2/config v1.15.15 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.12.10 // indirect
@@ -58,9 +59,8 @@ require (
 	github.com/paulmach/orb v0.7.1 // indirect
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/sfomuseum/go-edtf v1.1.1 // indirect
-	github.com/sfomuseum/go-flags v0.10.0 // indirect
 	github.com/sfomuseum/iso8601duration v1.1.0 // indirect
-	github.com/sfomuseum/runtimevar v1.0.3 // indirect
+	github.com/sfomuseum/runtimevar v1.0.4 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/whosonfirst/go-ioutil v1.0.2 // indirect
@@ -75,10 +75,10 @@ require (
 	go.opencensus.io v0.23.0 // indirect
 	gocloud.dev v0.27.0 // indirect
 	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa // indirect
-	golang.org/x/net v0.0.0-20220802222814-0bcc04d9c69b // indirect
+	golang.org/x/net v0.1.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20220722155238-128564f6959c // indirect
-	golang.org/x/sys v0.0.0-20220731174439-a90be440212d // indirect
-	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/sys v0.1.0 // indirect
+	golang.org/x/text v0.4.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f // indirect
 	google.golang.org/api v0.91.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
