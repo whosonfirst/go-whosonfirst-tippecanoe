@@ -1,2 +1,4 @@
+GOMOD=vendor
+
 cli:
-	go build -mod vendor -o bin/features cmd/features/main.go
+	go build -mod $(GOMOD) -ldflags="-s -w" -o bin/features cmd/features/main.go

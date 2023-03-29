@@ -8,11 +8,11 @@ require (
 	github.com/tidwall/gjson v1.14.4
 	github.com/tidwall/sjson v1.2.5
 	github.com/whosonfirst/go-whosonfirst-iterate-organization v1.1.0
-	github.com/whosonfirst/go-whosonfirst-iterate/v2 v2.3.1
+	github.com/whosonfirst/go-whosonfirst-iterate/v2 v2.3.2
 	github.com/whosonfirst/go-whosonfirst-iterwriter v0.0.9
-	github.com/whosonfirst/go-whosonfirst-spr/v2 v2.3.3
-	github.com/whosonfirst/go-whosonfirst-uri v1.2.0
-	github.com/whosonfirst/go-writer-featurecollection/v3 v3.0.0
+	github.com/whosonfirst/go-whosonfirst-spr/v2 v2.3.6
+	github.com/whosonfirst/go-whosonfirst-uri v1.3.0
+	github.com/whosonfirst/go-writer-featurecollection/v3 v3.0.1
 	github.com/whosonfirst/go-writer-jsonl/v3 v3.0.1
 	github.com/whosonfirst/go-writer/v3 v3.1.0
 )
@@ -56,7 +56,7 @@ require (
 	github.com/kevinburke/ssh_config v0.0.0-20201106050909-4977a11b4351 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/natefinch/atomic v1.0.1 // indirect
-	github.com/paulmach/orb v0.7.1 // indirect
+	github.com/paulmach/orb v0.8.0 // indirect
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/sfomuseum/go-edtf v1.1.1 // indirect
 	github.com/sfomuseum/iso8601duration v1.1.0 // indirect
@@ -64,13 +64,13 @@ require (
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/whosonfirst/go-ioutil v1.0.2 // indirect
-	github.com/whosonfirst/go-whosonfirst-crawl v0.2.1 // indirect
-	github.com/whosonfirst/go-whosonfirst-feature v0.0.24 // indirect
-	github.com/whosonfirst/go-whosonfirst-flags v0.4.4 // indirect
+	github.com/whosonfirst/go-whosonfirst-crawl v0.2.2 // indirect
+	github.com/whosonfirst/go-whosonfirst-feature v0.0.26 // indirect
+	github.com/whosonfirst/go-whosonfirst-flags v0.5.1 // indirect
 	github.com/whosonfirst/go-whosonfirst-github v0.5.0 // indirect
 	github.com/whosonfirst/go-whosonfirst-iterate-git/v2 v2.1.0 // indirect
 	github.com/whosonfirst/go-whosonfirst-sources v0.1.0 // indirect
-	github.com/whosonfirst/walk v0.0.1 // indirect
+	github.com/whosonfirst/walk v0.0.2 // indirect
 	github.com/xanzy/ssh-agent v0.3.0 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	gocloud.dev v0.27.0 // indirect
