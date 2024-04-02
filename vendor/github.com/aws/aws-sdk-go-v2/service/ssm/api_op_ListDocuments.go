@@ -32,22 +32,22 @@ func (c *Client) ListDocuments(ctx context.Context, params *ListDocumentsInput, 
 
 type ListDocumentsInput struct {
 
-	// This data type is deprecated. Instead, use Filters.
+	// This data type is deprecated. Instead, use Filters .
 	DocumentFilterList []types.DocumentFilter
 
 	// One or more DocumentKeyValuesFilter objects. Use a filter to return a more
 	// specific list of results. For keys, you can specify one or more key-value pair
-	// tags that have been applied to a document. Other valid keys include Owner, Name,
-	// PlatformTypes, DocumentType, and TargetType. For example, to return documents
-	// you own use Key=Owner,Values=Self. To specify a custom key-value pair, use the
-	// format Key=tag:tagName,Values=valueName. This API operation only supports
-	// filtering documents by using a single tag key and one or more tag values. For
-	// example: Key=tag:tagName,Values=valueName1,valueName2
+	// tags that have been applied to a document. Other valid keys include Owner , Name
+	// , PlatformTypes , DocumentType , and TargetType . For example, to return
+	// documents you own use Key=Owner,Values=Self . To specify a custom key-value
+	// pair, use the format Key=tag:tagName,Values=valueName . This API operation only
+	// supports filtering documents by using a single tag key and one or more tag
+	// values. For example: Key=tag:tagName,Values=valueName1,valueName2
 	Filters []types.DocumentKeyValuesFilter
 
 	// The maximum number of items to return for this call. The call also returns a
 	// token that you can specify in a subsequent call to get the next set of results.
-	MaxResults int32
+	MaxResults *int32
 
 	// The token for the next set of items to return. (You received this token from a
 	// previous call.)
@@ -72,12 +72,22 @@ type ListDocumentsOutput struct {
 }
 
 func (c *Client) addOperationListDocumentsMiddlewares(stack *middleware.Stack, options Options) (err error) {
+	if err := stack.Serialize.Add(&setOperationInputMiddleware{}, middleware.After); err != nil {
+		return err
+	}
 	err = stack.Serialize.Add(&awsAwsjson11_serializeOpListDocuments{}, middleware.After)
 	if err != nil {
 		return err
 	}
 	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpListDocuments{}, middleware.After)
 	if err != nil {
+		return err
+	}
+	if err := addProtocolFinalizerMiddlewares(stack, options, "ListDocuments"); err != nil {
+		return fmt.Errorf("add protocol finalizers: %v", err)
+	}
+
+	if err = addlegacyEndpointContextSetter(stack, options); err != nil {
 		return err
 	}
 	if err = addSetLoggerMiddleware(stack, options); err != nil {
@@ -98,16 +108,13 @@ func (c *Client) addOperationListDocumentsMiddlewares(stack *middleware.Stack, o
 	if err = addRetryMiddlewares(stack, options); err != nil {
 		return err
 	}
-	if err = addHTTPSignerV4Middleware(stack, options); err != nil {
-		return err
-	}
 	if err = awsmiddleware.AddRawResponseToMetadata(stack); err != nil {
 		return err
 	}
 	if err = awsmiddleware.AddRecordResponseTiming(stack); err != nil {
 		return err
 	}
-	if err = addClientUserAgent(stack); err != nil {
+	if err = addClientUserAgent(stack, options); err != nil {
 		return err
 	}
 	if err = smithyhttp.AddErrorCloseResponseBodyMiddleware(stack); err != nil {
@@ -116,10 +123,16 @@ func (c *Client) addOperationListDocumentsMiddlewares(stack *middleware.Stack, o
 	if err = smithyhttp.AddCloseResponseBodyMiddleware(stack); err != nil {
 		return err
 	}
+	if err = addSetLegacyContextSigningOptionsMiddleware(stack); err != nil {
+		return err
+	}
 	if err = addOpListDocumentsValidationMiddleware(stack); err != nil {
 		return err
 	}
 	if err = stack.Initialize.Add(newServiceMetadataMiddleware_opListDocuments(options.Region), middleware.Before); err != nil {
+		return err
+	}
+	if err = awsmiddleware.AddRecursionDetection(stack); err != nil {
 		return err
 	}
 	if err = addRequestIDRetrieverMiddleware(stack); err != nil {
@@ -129,6 +142,9 @@ func (c *Client) addOperationListDocumentsMiddlewares(stack *middleware.Stack, o
 		return err
 	}
 	if err = addRequestResponseLogging(stack, options); err != nil {
+		return err
+	}
+	if err = addDisableHTTPSMiddleware(stack, options); err != nil {
 		return err
 	}
 	return nil
@@ -168,8 +184,8 @@ func NewListDocumentsPaginator(client ListDocumentsAPIClient, params *ListDocume
 	}
 
 	options := ListDocumentsPaginatorOptions{}
-	if params.MaxResults != 0 {
-		options.Limit = params.MaxResults
+	if params.MaxResults != nil {
+		options.Limit = *params.MaxResults
 	}
 
 	for _, fn := range optFns {
@@ -199,7 +215,11 @@ func (p *ListDocumentsPaginator) NextPage(ctx context.Context, optFns ...func(*O
 	params := *p.params
 	params.NextToken = p.nextToken
 
-	params.MaxResults = p.options.Limit
+	var limit *int32
+	if p.options.Limit > 0 {
+		limit = &p.options.Limit
+	}
+	params.MaxResults = limit
 
 	result, err := p.client.ListDocuments(ctx, &params, optFns...)
 	if err != nil {
@@ -224,7 +244,6 @@ func newServiceMetadataMiddleware_opListDocuments(region string) *awsmiddleware.
 	return &awsmiddleware.RegisterServiceMetadata{
 		Region:        region,
 		ServiceID:     ServiceID,
-		SigningName:   "ssm",
 		OperationName: "ListDocuments",
 	}
 }

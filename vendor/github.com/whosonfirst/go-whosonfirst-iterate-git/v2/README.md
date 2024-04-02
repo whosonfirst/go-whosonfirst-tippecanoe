@@ -4,7 +4,7 @@ Go package implementing go-whosonfirst-iterate/emitter functionality for Git rep
 
 ## Important
 
-Documentation for this package is incomplete and will be updated shortly.
+[![Go Reference](https://pkg.go.dev/badge/github.com/whosonfirst/go-whosonfirst-iterate-git.svg)](https://pkg.go.dev/github.com/whosonfirst/go-whosonfirst-iterate-git)
 
 ## Example
 

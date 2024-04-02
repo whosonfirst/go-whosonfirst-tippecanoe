@@ -3,14 +3,15 @@ package featurecollection
 import (
 	"context"
 	"fmt"
-	"github.com/paulmach/orb/geojson"
-	"github.com/whosonfirst/go-writer/v3"
 	"io"
 	"log"
 	"net/url"
 	"strings"
 	"sync"
 	"sync/atomic"
+
+	"github.com/paulmach/orb/geojson"
+	"github.com/whosonfirst/go-writer/v3"	
 )
 
 func init() {
@@ -101,8 +102,8 @@ func (fc *FeatureCollectionWriter) Write(ctx context.Context, key string, fh io.
 	fc.mu.Lock()
 
 	defer func() {
+		atomic.AddInt64(&fc.count, 1)		
 		fc.mu.Unlock()
-		atomic.AddInt64(&fc.count, 1)
 	}()
 
 	var preamble string

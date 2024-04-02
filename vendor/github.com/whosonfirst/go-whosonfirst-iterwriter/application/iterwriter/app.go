@@ -4,21 +4,24 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"log"
+	"os"
+	"strings"
+	"time"
+
 	"github.com/sfomuseum/go-flags/flagset"
 	"github.com/sfomuseum/go-timings"
 	"github.com/sfomuseum/runtimevar"
 	"github.com/whosonfirst/go-whosonfirst-iterwriter"
 	"github.com/whosonfirst/go-writer/v3"
-	"log"
-	"os"
-	"strings"
-	"time"
 )
 
 type RunOptions struct {
-	Logger       *log.Logger
-	FlagSet      *flag.FlagSet
-	CallbackFunc iterwriter.IterwriterCallbackFunc
+	Logger          *log.Logger
+	FlagSet         *flag.FlagSet
+	FlagSetIsParsed bool
+	CallbackFunc    iterwriter.IterwriterCallbackFunc
+	Writer          writer.Writer
 }
 
 func Run(ctx context.Context, logger *log.Logger) error {
@@ -41,7 +44,9 @@ func RunWithOptions(ctx context.Context, opts *RunOptions) error {
 
 	fs := opts.FlagSet
 
-	flagset.Parse(fs)
+	if !opts.FlagSetIsParsed {
+		flagset.Parse(fs)
+	}
 
 	err := flagset.SetFlagsFromEnvVars(fs, "WOF")
 
@@ -51,35 +56,44 @@ func RunWithOptions(ctx context.Context, opts *RunOptions) error {
 
 	iterator_paths := fs.Args()
 
-	writers := make([]writer.Writer, len(writer_uris))
+	var mw writer.Writer
 
-	wr_ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
-	defer cancel()
+	if opts.Writer != nil {
+		mw = opts.Writer
+	} else {
 
-	for idx, runtimevar_uri := range writer_uris {
+		writers := make([]writer.Writer, len(writer_uris))
 
-		wr_uri, err := runtimevar.StringVar(wr_ctx, runtimevar_uri)
+		wr_ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
+		defer cancel()
 
-		if err != nil {
-			return fmt.Errorf("Failed to derive writer URI for %s, %w", runtimevar_uri, err)
+		for idx, runtimevar_uri := range writer_uris {
+
+			wr_uri, err := runtimevar.StringVar(wr_ctx, runtimevar_uri)
+
+			if err != nil {
+				return fmt.Errorf("Failed to derive writer URI for %s, %w", runtimevar_uri, err)
+			}
+
+			wr_uri = strings.TrimSpace(wr_uri)
+
+			wr, err := writer.NewWriter(ctx, wr_uri)
+
+			if err != nil {
+
+				return fmt.Errorf("Failed to create new writer for %s, %w", runtimevar_uri, err)
+			}
+
+			writers[idx] = wr
 		}
 
-		wr_uri = strings.TrimSpace(wr_uri)
-
-		wr, err := writer.NewWriter(ctx, wr_uri)
+		_mw, err := writer.NewMultiWriter(ctx, writers...)
 
 		if err != nil {
-
-			return fmt.Errorf("Failed to create new writer for %s, %w", runtimevar_uri, err)
+			return fmt.Errorf("Failed to create multi writer, %w", err)
 		}
 
-		writers[idx] = wr
-	}
-
-	mw, err := writer.NewMultiWriter(ctx, writers...)
-
-	if err != nil {
-		return fmt.Errorf("Failed to create multi writer, %w", err)
+		mw = _mw
 	}
 
 	monitor, err := timings.NewMonitor(ctx, monitor_uri)

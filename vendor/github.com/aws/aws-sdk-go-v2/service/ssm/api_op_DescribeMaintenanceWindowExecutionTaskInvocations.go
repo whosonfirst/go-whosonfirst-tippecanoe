@@ -42,14 +42,14 @@ type DescribeMaintenanceWindowExecutionTaskInvocationsInput struct {
 	// This member is required.
 	WindowExecutionId *string
 
-	// Optional filters used to scope down the returned task invocations. The supported
-	// filter key is STATUS with the corresponding values PENDING, IN_PROGRESS,
-	// SUCCESS, FAILED, TIMED_OUT, CANCELLING, and CANCELLED.
+	// Optional filters used to scope down the returned task invocations. The
+	// supported filter key is STATUS with the corresponding values PENDING ,
+	// IN_PROGRESS , SUCCESS , FAILED , TIMED_OUT , CANCELLING , and CANCELLED .
 	Filters []types.MaintenanceWindowFilter
 
 	// The maximum number of items to return for this call. The call also returns a
 	// token that you can specify in a subsequent call to get the next set of results.
-	MaxResults int32
+	MaxResults *int32
 
 	// The token for the next set of items to return. (You received this token from a
 	// previous call.)
@@ -74,12 +74,22 @@ type DescribeMaintenanceWindowExecutionTaskInvocationsOutput struct {
 }
 
 func (c *Client) addOperationDescribeMaintenanceWindowExecutionTaskInvocationsMiddlewares(stack *middleware.Stack, options Options) (err error) {
+	if err := stack.Serialize.Add(&setOperationInputMiddleware{}, middleware.After); err != nil {
+		return err
+	}
 	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDescribeMaintenanceWindowExecutionTaskInvocations{}, middleware.After)
 	if err != nil {
 		return err
 	}
 	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDescribeMaintenanceWindowExecutionTaskInvocations{}, middleware.After)
 	if err != nil {
+		return err
+	}
+	if err := addProtocolFinalizerMiddlewares(stack, options, "DescribeMaintenanceWindowExecutionTaskInvocations"); err != nil {
+		return fmt.Errorf("add protocol finalizers: %v", err)
+	}
+
+	if err = addlegacyEndpointContextSetter(stack, options); err != nil {
 		return err
 	}
 	if err = addSetLoggerMiddleware(stack, options); err != nil {
@@ -100,16 +110,13 @@ func (c *Client) addOperationDescribeMaintenanceWindowExecutionTaskInvocationsMi
 	if err = addRetryMiddlewares(stack, options); err != nil {
 		return err
 	}
-	if err = addHTTPSignerV4Middleware(stack, options); err != nil {
-		return err
-	}
 	if err = awsmiddleware.AddRawResponseToMetadata(stack); err != nil {
 		return err
 	}
 	if err = awsmiddleware.AddRecordResponseTiming(stack); err != nil {
 		return err
 	}
-	if err = addClientUserAgent(stack); err != nil {
+	if err = addClientUserAgent(stack, options); err != nil {
 		return err
 	}
 	if err = smithyhttp.AddErrorCloseResponseBodyMiddleware(stack); err != nil {
@@ -118,10 +125,16 @@ func (c *Client) addOperationDescribeMaintenanceWindowExecutionTaskInvocationsMi
 	if err = smithyhttp.AddCloseResponseBodyMiddleware(stack); err != nil {
 		return err
 	}
+	if err = addSetLegacyContextSigningOptionsMiddleware(stack); err != nil {
+		return err
+	}
 	if err = addOpDescribeMaintenanceWindowExecutionTaskInvocationsValidationMiddleware(stack); err != nil {
 		return err
 	}
 	if err = stack.Initialize.Add(newServiceMetadataMiddleware_opDescribeMaintenanceWindowExecutionTaskInvocations(options.Region), middleware.Before); err != nil {
+		return err
+	}
+	if err = awsmiddleware.AddRecursionDetection(stack); err != nil {
 		return err
 	}
 	if err = addRequestIDRetrieverMiddleware(stack); err != nil {
@@ -131,6 +144,9 @@ func (c *Client) addOperationDescribeMaintenanceWindowExecutionTaskInvocationsMi
 		return err
 	}
 	if err = addRequestResponseLogging(stack, options); err != nil {
+		return err
+	}
+	if err = addDisableHTTPSMiddleware(stack, options); err != nil {
 		return err
 	}
 	return nil
@@ -174,8 +190,8 @@ func NewDescribeMaintenanceWindowExecutionTaskInvocationsPaginator(client Descri
 	}
 
 	options := DescribeMaintenanceWindowExecutionTaskInvocationsPaginatorOptions{}
-	if params.MaxResults != 0 {
-		options.Limit = params.MaxResults
+	if params.MaxResults != nil {
+		options.Limit = *params.MaxResults
 	}
 
 	for _, fn := range optFns {
@@ -206,7 +222,11 @@ func (p *DescribeMaintenanceWindowExecutionTaskInvocationsPaginator) NextPage(ct
 	params := *p.params
 	params.NextToken = p.nextToken
 
-	params.MaxResults = p.options.Limit
+	var limit *int32
+	if p.options.Limit > 0 {
+		limit = &p.options.Limit
+	}
+	params.MaxResults = limit
 
 	result, err := p.client.DescribeMaintenanceWindowExecutionTaskInvocations(ctx, &params, optFns...)
 	if err != nil {
@@ -231,7 +251,6 @@ func newServiceMetadataMiddleware_opDescribeMaintenanceWindowExecutionTaskInvoca
 	return &awsmiddleware.RegisterServiceMetadata{
 		Region:        region,
 		ServiceID:     ServiceID,
-		SigningName:   "ssm",
 		OperationName: "DescribeMaintenanceWindowExecutionTaskInvocations",
 	}
 }

@@ -9,4 +9,4 @@ Documentation is incomplete at this time.
 ## See also
 
 * https://github.com/whosonfirst/go-whosonfirst-iterate/v2
-* https://github.com/whosonfirst/go-whosonfirst-writer/v2
+* https://github.com/whosonfirst/go-whosonfirst-writer

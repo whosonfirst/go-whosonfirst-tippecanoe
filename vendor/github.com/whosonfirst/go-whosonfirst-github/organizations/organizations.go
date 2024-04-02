@@ -2,7 +2,7 @@ package organizations
 
 import (
 	"fmt"
-	"github.com/google/go-github/v27/github"
+	"github.com/google/go-github/v48/github"
 	"github.com/whosonfirst/go-whosonfirst-github/util"
 	"log"
 	"strings"

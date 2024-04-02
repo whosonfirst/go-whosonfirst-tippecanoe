@@ -2,6 +2,7 @@ package git
 
 import (
 	"context"
+	"fmt"
 	gogit "github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
@@ -12,6 +13,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strconv"
 )
 
 func init() {
@@ -19,20 +21,35 @@ func init() {
 	emitter.RegisterEmitter(ctx, "git", NewGitEmitter)
 }
 
+// GitEmitter implements the `Emitter` interface for crawling records in a Git repository.
 type GitEmitter struct {
 	emitter.Emitter
-	target   string
+	// An optional path on disk where Git respositories will be cloned.
+	target string
+	// A boolean value indicating whether a Git repository (cloned to disk) should not be removed after processing.
 	preserve bool
-	filters  filters.Filters
-	branch   string
+	// filters is a `filters.Filters` instance used to include or exclude specific records from being crawled.
+	filters filters.Filters
+	// The branch of the Git repository to clone.
+	branch string
 }
 
+// NewGitEmitter() returns a new `GitEmitter` instance configured by 'uri' in the form of:
+//
+//	git://{PATH}?{PARAMETERS}
+//
+// Where {PATH} is an optional path on disk where a repository will be clone to (default is to clone repository in memory) and {PARAMETERS} may be:
+// * `?include=` Zero or more `aaronland/go-json-query` query strings containing rules that must match for a document to be considered for further processing.
+// * `?exclude=` Zero or more `aaronland/go-json-query`	query strings containing rules that if matched will prevent a document from being considered for further processing.
+// * `?include_mode=` A valid `aaronland/go-json-query` query mode string for testing inclusion rules.
+// * `?exclude_mode=` A valid `aaronland/go-json-query` query mode string for testing exclusion rules.
+// * `?preserve=` A boolean value indicating whether a Git repository (cloned to disk) should not be removed after processing.
 func NewGitEmitter(ctx context.Context, uri string) (emitter.Emitter, error) {
 
 	u, err := url.Parse(uri)
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Failed to parse URI, %w", err)
 	}
 
 	em := &GitEmitter{
@@ -44,13 +61,22 @@ func NewGitEmitter(ctx context.Context, uri string) (emitter.Emitter, error) {
 	f, err := filters.NewQueryFiltersFromQuery(ctx, q)
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Failed to create query filters, %w", err)
 	}
 
 	em.filters = f
 
-	if q.Get("preserve") == "1" {
-		em.preserve = true
+	str_preserve := q.Get("preserve")
+
+	if str_preserve != "" {
+
+		preserve, err := strconv.ParseBool(str_preserve)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to parse 'preserve' parameter, %w", err)
+		}
+
+		em.preserve = preserve
 	}
 
 	branch := q.Get("branch")
@@ -62,6 +88,8 @@ func NewGitEmitter(ctx context.Context, uri string) (emitter.Emitter, error) {
 	return em, nil
 }
 
+// WalkURI() walks (crawls) the Git repository identified by 'uri' and for each file (not excluded by any filters specified
+// when `idx` was created) invokes 'index_cb'.
 func (em *GitEmitter) WalkURI(ctx context.Context, index_cb emitter.EmitterCallbackFunc, uri string) error {
 
 	var repo *gogit.Repository
@@ -81,7 +109,7 @@ func (em *GitEmitter) WalkURI(ctx context.Context, index_cb emitter.EmitterCallb
 		r, err := gogit.Clone(memory.NewStorage(), nil, opts)
 
 		if err != nil {
-			return err
+			return fmt.Errorf("Failed to clone repository, %w", err)
 		}
 
 		repo = r
@@ -93,7 +121,7 @@ func (em *GitEmitter) WalkURI(ctx context.Context, index_cb emitter.EmitterCallb
 		r, err := gogit.PlainClone(path, false, opts)
 
 		if err != nil {
-			return err
+			return fmt.Errorf("Failed to clone repository, %w", err)
 		}
 
 		if !em.preserve {
@@ -106,22 +134,22 @@ func (em *GitEmitter) WalkURI(ctx context.Context, index_cb emitter.EmitterCallb
 	ref, err := repo.Head()
 
 	if err != nil {
-		return err
+		return fmt.Errorf("Failed to derive head for repository, %w", err)
 	}
 
 	commit, err := repo.CommitObject(ref.Hash())
 
 	if err != nil {
-		return err
+		return fmt.Errorf("Failed to derive object for ref hash, %w", err)
 	}
 
 	tree, err := commit.Tree()
 
 	if err != nil {
-		return err
+		return fmt.Errorf("Failed to derive commit tree, %w", err)
 	}
 
-	tree.Files().ForEach(func(f *object.File) error {
+	err = tree.Files().ForEach(func(f *object.File) error {
 
 		switch filepath.Ext(f.Name) {
 		case ".geojson":
@@ -133,7 +161,7 @@ func (em *GitEmitter) WalkURI(ctx context.Context, index_cb emitter.EmitterCallb
 		r, err := f.Reader()
 
 		if err != nil {
-			return err
+			return fmt.Errorf("Failed to derive reader for %s, %w", f.Name, err)
 		}
 
 		defer r.Close()
@@ -141,15 +169,17 @@ func (em *GitEmitter) WalkURI(ctx context.Context, index_cb emitter.EmitterCallb
 		fh, err := ioutil.NewReadSeekCloser(r)
 
 		if err != nil {
-			return err
+			return fmt.Errorf("Failed to create ReadSeekCloser for %s, %w", f.Name, err)
 		}
 
+		defer fh.Close()
+		
 		if em.filters != nil {
 
 			ok, err := em.filters.Apply(ctx, fh)
 
 			if err != nil {
-				return err
+				return fmt.Errorf("Failed to apply query filters to %s, %w", f.Name, err)
 			}
 
 			if !ok {
@@ -159,12 +189,16 @@ func (em *GitEmitter) WalkURI(ctx context.Context, index_cb emitter.EmitterCallb
 			_, err = fh.Seek(0, 0)
 
 			if err != nil {
-				return err
+				return fmt.Errorf("Failed to reset filehandle for %s, %w", f.Name, err)
 			}
 		}
 
 		return index_cb(ctx, f.Name, fh)
 	})
+
+	if err != nil {
+		return fmt.Errorf("Failed to iterate through tree, %w", err)
+	}
 
 	return nil
 }

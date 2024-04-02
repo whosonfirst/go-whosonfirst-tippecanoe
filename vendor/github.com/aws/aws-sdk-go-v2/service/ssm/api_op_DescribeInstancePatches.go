@@ -37,22 +37,17 @@ type DescribeInstancePatchesInput struct {
 	InstanceId *string
 
 	// Each element in the array is a structure containing a key-value pair. Supported
-	// keys for DescribeInstancePatchesinclude the following:
-	//
-	// * Classification Sample
-	// values: Security | SecurityUpdates
-	//
-	// * KBId Sample values: KB4480056 |
-	// java-1.7.0-openjdk.x86_64
-	//
-	// * Severity Sample values: Important | Medium | Low
-	//
-	// *
-	// State Sample values: Installed | InstalledOther | InstalledPendingReboot
+	// keys for DescribeInstancePatches include the following:
+	//   - Classification Sample values: Security | SecurityUpdates
+	//   - KBId Sample values: KB4480056 | java-1.7.0-openjdk.x86_64
+	//   - Severity Sample values: Important | Medium | Low
+	//   - State Sample values: Installed | InstalledOther | InstalledPendingReboot For
+	//   lists of all State values, see Understanding patch compliance state values (https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager-compliance-states.html)
+	//   in the Amazon Web Services Systems Manager User Guide.
 	Filters []types.PatchOrchestratorFilter
 
 	// The maximum number of patches to return (per page).
-	MaxResults int32
+	MaxResults *int32
 
 	// The token for the next set of items to return. (You received this token from a
 	// previous call.)
@@ -68,22 +63,13 @@ type DescribeInstancePatchesOutput struct {
 	NextToken *string
 
 	// Each entry in the array is a structure containing:
-	//
-	// * Title (string)
-	//
-	// * KBId
-	// (string)
-	//
-	// * Classification (string)
-	//
-	// * Severity (string)
-	//
-	// * State (string, such
-	// as "INSTALLED" or "FAILED")
-	//
-	// * InstalledTime (DateTime)
-	//
-	// * InstalledBy (string)
+	//   - Title (string)
+	//   - KBId (string)
+	//   - Classification (string)
+	//   - Severity (string)
+	//   - State (string, such as "INSTALLED" or "FAILED")
+	//   - InstalledTime (DateTime)
+	//   - InstalledBy (string)
 	Patches []types.PatchComplianceData
 
 	// Metadata pertaining to the operation's result.
@@ -93,12 +79,22 @@ type DescribeInstancePatchesOutput struct {
 }
 
 func (c *Client) addOperationDescribeInstancePatchesMiddlewares(stack *middleware.Stack, options Options) (err error) {
+	if err := stack.Serialize.Add(&setOperationInputMiddleware{}, middleware.After); err != nil {
+		return err
+	}
 	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDescribeInstancePatches{}, middleware.After)
 	if err != nil {
 		return err
 	}
 	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDescribeInstancePatches{}, middleware.After)
 	if err != nil {
+		return err
+	}
+	if err := addProtocolFinalizerMiddlewares(stack, options, "DescribeInstancePatches"); err != nil {
+		return fmt.Errorf("add protocol finalizers: %v", err)
+	}
+
+	if err = addlegacyEndpointContextSetter(stack, options); err != nil {
 		return err
 	}
 	if err = addSetLoggerMiddleware(stack, options); err != nil {
@@ -119,16 +115,13 @@ func (c *Client) addOperationDescribeInstancePatchesMiddlewares(stack *middlewar
 	if err = addRetryMiddlewares(stack, options); err != nil {
 		return err
 	}
-	if err = addHTTPSignerV4Middleware(stack, options); err != nil {
-		return err
-	}
 	if err = awsmiddleware.AddRawResponseToMetadata(stack); err != nil {
 		return err
 	}
 	if err = awsmiddleware.AddRecordResponseTiming(stack); err != nil {
 		return err
 	}
-	if err = addClientUserAgent(stack); err != nil {
+	if err = addClientUserAgent(stack, options); err != nil {
 		return err
 	}
 	if err = smithyhttp.AddErrorCloseResponseBodyMiddleware(stack); err != nil {
@@ -137,10 +130,16 @@ func (c *Client) addOperationDescribeInstancePatchesMiddlewares(stack *middlewar
 	if err = smithyhttp.AddCloseResponseBodyMiddleware(stack); err != nil {
 		return err
 	}
+	if err = addSetLegacyContextSigningOptionsMiddleware(stack); err != nil {
+		return err
+	}
 	if err = addOpDescribeInstancePatchesValidationMiddleware(stack); err != nil {
 		return err
 	}
 	if err = stack.Initialize.Add(newServiceMetadataMiddleware_opDescribeInstancePatches(options.Region), middleware.Before); err != nil {
+		return err
+	}
+	if err = awsmiddleware.AddRecursionDetection(stack); err != nil {
 		return err
 	}
 	if err = addRequestIDRetrieverMiddleware(stack); err != nil {
@@ -150,6 +149,9 @@ func (c *Client) addOperationDescribeInstancePatchesMiddlewares(stack *middlewar
 		return err
 	}
 	if err = addRequestResponseLogging(stack, options); err != nil {
+		return err
+	}
+	if err = addDisableHTTPSMiddleware(stack, options); err != nil {
 		return err
 	}
 	return nil
@@ -191,8 +193,8 @@ func NewDescribeInstancePatchesPaginator(client DescribeInstancePatchesAPIClient
 	}
 
 	options := DescribeInstancePatchesPaginatorOptions{}
-	if params.MaxResults != 0 {
-		options.Limit = params.MaxResults
+	if params.MaxResults != nil {
+		options.Limit = *params.MaxResults
 	}
 
 	for _, fn := range optFns {
@@ -222,7 +224,11 @@ func (p *DescribeInstancePatchesPaginator) NextPage(ctx context.Context, optFns 
 	params := *p.params
 	params.NextToken = p.nextToken
 
-	params.MaxResults = p.options.Limit
+	var limit *int32
+	if p.options.Limit > 0 {
+		limit = &p.options.Limit
+	}
+	params.MaxResults = limit
 
 	result, err := p.client.DescribeInstancePatches(ctx, &params, optFns...)
 	if err != nil {
@@ -247,7 +253,6 @@ func newServiceMetadataMiddleware_opDescribeInstancePatches(region string) *awsm
 	return &awsmiddleware.RegisterServiceMetadata{
 		Region:        region,
 		ServiceID:     ServiceID,
-		SigningName:   "ssm",
 		OperationName: "DescribeInstancePatches",
 	}
 }

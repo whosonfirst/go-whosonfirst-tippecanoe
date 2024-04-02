@@ -3,13 +3,14 @@ package iterwriter
 import (
 	"context"
 	"fmt"
+	"io"
+	"log"
+
 	"github.com/sfomuseum/go-timings"
 	"github.com/whosonfirst/go-whosonfirst-iterate/v2/emitter"
 	"github.com/whosonfirst/go-whosonfirst-iterate/v2/iterator"
 	"github.com/whosonfirst/go-whosonfirst-uri"
 	"github.com/whosonfirst/go-writer/v3"
-	"io"
-	"log"
 )
 
 // Type IterwriterCallbackFunc defines a function to be invoked that will return a `emitter.EmitterCallbackFunc`
@@ -69,7 +70,7 @@ func IterateWithWriterAndCallback(ctx context.Context, wr writer.Writer, iter_cb
 	err = wr.Close(ctx)
 
 	if err != nil {
-		return fmt.Errorf("Failed to close ES writer, %w", err)
+		return fmt.Errorf("Failed to close writer, %w", err)
 	}
 
 	return nil

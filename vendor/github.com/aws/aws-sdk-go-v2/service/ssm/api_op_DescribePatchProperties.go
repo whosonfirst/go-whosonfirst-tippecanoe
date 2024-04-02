@@ -15,12 +15,12 @@ import (
 // Lists the properties of available patches organized by product, product family,
 // classification, severity, and other properties of available patches. You can use
 // the reported properties in the filters you specify in requests for operations
-// such as CreatePatchBaseline, UpdatePatchBaseline, DescribeAvailablePatches, and
-// DescribePatchBaselines. The following section lists the properties that can be
-// used in filters for each major operating system type: AMAZON_LINUX Valid
-// properties: PRODUCT | CLASSIFICATION | SEVERITY AMAZON_LINUX_2 Valid properties:
-// PRODUCT | CLASSIFICATION | SEVERITY CENTOS Valid properties: PRODUCT |
-// CLASSIFICATION | SEVERITY DEBIAN Valid properties: PRODUCT | PRIORITY MACOS
+// such as CreatePatchBaseline , UpdatePatchBaseline , DescribeAvailablePatches ,
+// and DescribePatchBaselines . The following section lists the properties that can
+// be used in filters for each major operating system type: AMAZON_LINUX Valid
+// properties: PRODUCT | CLASSIFICATION | SEVERITY AMAZON_LINUX_2 Valid
+// properties: PRODUCT | CLASSIFICATION | SEVERITY CENTOS Valid properties: PRODUCT
+// | CLASSIFICATION | SEVERITY DEBIAN Valid properties: PRODUCT | PRIORITY MACOS
 // Valid properties: PRODUCT | CLASSIFICATION ORACLE_LINUX Valid properties:
 // PRODUCT | CLASSIFICATION | SEVERITY REDHAT_ENTERPRISE_LINUX Valid properties:
 // PRODUCT | CLASSIFICATION | SEVERITY SUSE Valid properties: PRODUCT |
@@ -55,7 +55,7 @@ type DescribePatchPropertiesInput struct {
 
 	// The maximum number of items to return for this call. The call also returns a
 	// token that you can specify in a subsequent call to get the next set of results.
-	MaxResults int32
+	MaxResults *int32
 
 	// The token for the next set of items to return. (You received this token from a
 	// previous call.)
@@ -85,12 +85,22 @@ type DescribePatchPropertiesOutput struct {
 }
 
 func (c *Client) addOperationDescribePatchPropertiesMiddlewares(stack *middleware.Stack, options Options) (err error) {
+	if err := stack.Serialize.Add(&setOperationInputMiddleware{}, middleware.After); err != nil {
+		return err
+	}
 	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDescribePatchProperties{}, middleware.After)
 	if err != nil {
 		return err
 	}
 	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDescribePatchProperties{}, middleware.After)
 	if err != nil {
+		return err
+	}
+	if err := addProtocolFinalizerMiddlewares(stack, options, "DescribePatchProperties"); err != nil {
+		return fmt.Errorf("add protocol finalizers: %v", err)
+	}
+
+	if err = addlegacyEndpointContextSetter(stack, options); err != nil {
 		return err
 	}
 	if err = addSetLoggerMiddleware(stack, options); err != nil {
@@ -111,16 +121,13 @@ func (c *Client) addOperationDescribePatchPropertiesMiddlewares(stack *middlewar
 	if err = addRetryMiddlewares(stack, options); err != nil {
 		return err
 	}
-	if err = addHTTPSignerV4Middleware(stack, options); err != nil {
-		return err
-	}
 	if err = awsmiddleware.AddRawResponseToMetadata(stack); err != nil {
 		return err
 	}
 	if err = awsmiddleware.AddRecordResponseTiming(stack); err != nil {
 		return err
 	}
-	if err = addClientUserAgent(stack); err != nil {
+	if err = addClientUserAgent(stack, options); err != nil {
 		return err
 	}
 	if err = smithyhttp.AddErrorCloseResponseBodyMiddleware(stack); err != nil {
@@ -129,10 +136,16 @@ func (c *Client) addOperationDescribePatchPropertiesMiddlewares(stack *middlewar
 	if err = smithyhttp.AddCloseResponseBodyMiddleware(stack); err != nil {
 		return err
 	}
+	if err = addSetLegacyContextSigningOptionsMiddleware(stack); err != nil {
+		return err
+	}
 	if err = addOpDescribePatchPropertiesValidationMiddleware(stack); err != nil {
 		return err
 	}
 	if err = stack.Initialize.Add(newServiceMetadataMiddleware_opDescribePatchProperties(options.Region), middleware.Before); err != nil {
+		return err
+	}
+	if err = awsmiddleware.AddRecursionDetection(stack); err != nil {
 		return err
 	}
 	if err = addRequestIDRetrieverMiddleware(stack); err != nil {
@@ -142,6 +155,9 @@ func (c *Client) addOperationDescribePatchPropertiesMiddlewares(stack *middlewar
 		return err
 	}
 	if err = addRequestResponseLogging(stack, options); err != nil {
+		return err
+	}
+	if err = addDisableHTTPSMiddleware(stack, options); err != nil {
 		return err
 	}
 	return nil
@@ -184,8 +200,8 @@ func NewDescribePatchPropertiesPaginator(client DescribePatchPropertiesAPIClient
 	}
 
 	options := DescribePatchPropertiesPaginatorOptions{}
-	if params.MaxResults != 0 {
-		options.Limit = params.MaxResults
+	if params.MaxResults != nil {
+		options.Limit = *params.MaxResults
 	}
 
 	for _, fn := range optFns {
@@ -215,7 +231,11 @@ func (p *DescribePatchPropertiesPaginator) NextPage(ctx context.Context, optFns 
 	params := *p.params
 	params.NextToken = p.nextToken
 
-	params.MaxResults = p.options.Limit
+	var limit *int32
+	if p.options.Limit > 0 {
+		limit = &p.options.Limit
+	}
+	params.MaxResults = limit
 
 	result, err := p.client.DescribePatchProperties(ctx, &params, optFns...)
 	if err != nil {
@@ -240,7 +260,6 @@ func newServiceMetadataMiddleware_opDescribePatchProperties(region string) *awsm
 	return &awsmiddleware.RegisterServiceMetadata{
 		Region:        region,
 		ServiceID:     ServiceID,
-		SigningName:   "ssm",
 		OperationName: "DescribePatchProperties",
 	}
 }
