@@ -21,6 +21,8 @@ Emit features derived from a `whosonfirst/go-whosonfirst-iterator` instance as J
 $> ./bin/features -h
   -as-spr
     	Replace Feature properties with Who's On First Standard Places Result (SPR) derived from that feature. (default true)
+  -forgiving
+    	Be "forgiving" of failed writes, logging the issue(s) but not triggering errors	
   -include-alt-files
     	Include alternate geometry files in output.
   -iterator-uri string

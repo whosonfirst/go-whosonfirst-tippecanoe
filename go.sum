@@ -234,8 +234,8 @@ github.com/whosonfirst/go-whosonfirst-iterate-organization v1.1.1 h1:ZDp2028/8vb
 github.com/whosonfirst/go-whosonfirst-iterate-organization v1.1.1/go.mod h1:A2+Fznrh6oSGnMzylFEzzK2eqOsnHe6Bs4l1yLjTDkY=
 github.com/whosonfirst/go-whosonfirst-iterate/v2 v2.3.4 h1:fEhr0jwqxXvG7Nb7id4Q26ucdBZD51TcFNIiU+VNopM=
 github.com/whosonfirst/go-whosonfirst-iterate/v2 v2.3.4/go.mod h1:kDIvHxJTo6XgFKmLHliGLxlqeeHhxuYtdeVZBAcP68g=
-github.com/whosonfirst/go-whosonfirst-iterwriter v0.0.17 h1:ayj8er2sQg/EbsBlpFTrMmPCU8s5V38i+kLBsYU1nbA=
-github.com/whosonfirst/go-whosonfirst-iterwriter v0.0.17/go.mod h1:YnagBB2woqKftWOzmAkPj/wfrifQWSNT5rgCH5izrfI=
+github.com/whosonfirst/go-whosonfirst-iterwriter v0.1.0 h1:g9WNqqB0jgdcW/q9XPP30t+4+6RlPz5o3CQHUFQGnPY=
+github.com/whosonfirst/go-whosonfirst-iterwriter v0.1.0/go.mod h1:xKOeEWFCvdWGOKpPVmFt9/iv2BZdLh6SkwDvu1R3yfY=
 github.com/whosonfirst/go-whosonfirst-sources v0.1.0 h1:JuKLa6KWke22jBfJ1pM9WQHoz1/3pbDv2C+aR+THPPQ=
 github.com/whosonfirst/go-whosonfirst-sources v0.1.0/go.mod h1:EUMHyGzUmqPPxlMmOp+28BFeoBdxxE0HCKRd67lkqGM=
 github.com/whosonfirst/go-whosonfirst-spr/v2 v2.3.7 h1:1j4IMuVua4/NhqKm2ke16h2V5Z2XiLoOdXbjDrfZb0E=
@@ -246,8 +246,8 @@ github.com/whosonfirst/go-writer-featurecollection/v3 v3.0.2 h1:dc1bZol+QPMjTY5r
 github.com/whosonfirst/go-writer-featurecollection/v3 v3.0.2/go.mod h1:Tl37NlsjW+Abb5EghgUhs2l9uUygL7g1Pd+b+odGx+8=
 github.com/whosonfirst/go-writer-jsonl/v3 v3.0.1 h1:ECVwoNFX0XIVLXPCa/fDeOw0Cf7dvS6IlULofNYk+Qs=
 github.com/whosonfirst/go-writer-jsonl/v3 v3.0.1/go.mod h1:zPIzNWCiiGt0UoNFVbt+jOCS2lLOf3oH/sb08e8UUnA=
-github.com/whosonfirst/go-writer/v3 v3.1.0 h1:lEZ6TIYvZb5NJ6e2OXYRM1j+MM2svKCSlb+6Vzbz+/M=
-github.com/whosonfirst/go-writer/v3 v3.1.0/go.mod h1:TmYoKR7RvrzJaj3eOgMhgXHFE+R1yuO/4smxKHFhv14=
+github.com/whosonfirst/go-writer/v3 v3.1.1 h1:YFG/LUzqr8tNNV/rqqvACrMT2jaoXMEecjVusRE06jI=
+github.com/whosonfirst/go-writer/v3 v3.1.1/go.mod h1:vK1dX0is3i0rw890qSsRXqsUkWlmZX5qiedwf1vSbkE=
 github.com/whosonfirst/walk v0.0.2 h1:fA0xskpnorC8OTvA1IKVOwQ12joCW6R5k2+/qd9lS7k=
 github.com/whosonfirst/walk v0.0.2/go.mod h1:HvRa/XX8jGtggvwAFMWMMuNy1M3+ZDqDX2hxiGR9b2o=
 github.com/xanzy/ssh-agent v0.3.3 h1:+/15pJfg/RsTxqYcX6fHqOXZwwMP+2VyYWJeWM2qQFM=

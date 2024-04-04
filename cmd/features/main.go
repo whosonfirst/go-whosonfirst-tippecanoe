@@ -8,18 +8,21 @@ import (
 
 import (
 	"context"
-	"github.com/whosonfirst/go-whosonfirst-tippecanoe/app/features"
-	"log"
+	"log/slog"
+	"os"
+	
+	"github.com/whosonfirst/go-whosonfirst-tippecanoe/app/features"	
 )
 
 func main() {
 
 	ctx := context.Background()
-	logger := log.Default()
+	logger := slog.Default()
 
 	err := features.Run(ctx, logger)
 
 	if err != nil {
-		logger.Fatalf("Failed to run iterwriter, %v", err)
+		logger.Error("Failed to run iterwriter", "error", err)
+		os.Exit(1)
 	}
 }

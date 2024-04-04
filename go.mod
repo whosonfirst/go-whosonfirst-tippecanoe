@@ -1,6 +1,6 @@
 module github.com/whosonfirst/go-whosonfirst-tippecanoe
 
-go 1.22
+go 1.22.1
 
 require (
 	github.com/sfomuseum/go-flags v0.10.0
@@ -9,12 +9,12 @@ require (
 	github.com/tidwall/sjson v1.2.5
 	github.com/whosonfirst/go-whosonfirst-iterate-organization v1.1.1
 	github.com/whosonfirst/go-whosonfirst-iterate/v2 v2.3.4
-	github.com/whosonfirst/go-whosonfirst-iterwriter v0.0.17
+	github.com/whosonfirst/go-whosonfirst-iterwriter v0.1.0
 	github.com/whosonfirst/go-whosonfirst-spr/v2 v2.3.7
 	github.com/whosonfirst/go-whosonfirst-uri v1.3.0
 	github.com/whosonfirst/go-writer-featurecollection/v3 v3.0.2
 	github.com/whosonfirst/go-writer-jsonl/v3 v3.0.1
-	github.com/whosonfirst/go-writer/v3 v3.1.0
+	github.com/whosonfirst/go-writer/v3 v3.1.1
 )
 
 require (
