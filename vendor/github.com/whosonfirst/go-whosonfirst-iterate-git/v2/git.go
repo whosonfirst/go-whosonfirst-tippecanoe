@@ -3,6 +3,11 @@ package git
 import (
 	"context"
 	"fmt"
+	"net/url"
+	"os"
+	"path/filepath"
+	"strconv"
+
 	gogit "github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
@@ -10,10 +15,6 @@ import (
 	"github.com/whosonfirst/go-ioutil"
 	"github.com/whosonfirst/go-whosonfirst-iterate/v2/emitter"
 	"github.com/whosonfirst/go-whosonfirst-iterate/v2/filters"
-	"net/url"
-	"os"
-	"path/filepath"
-	"strconv"
 )
 
 func init() {
@@ -173,7 +174,7 @@ func (em *GitEmitter) WalkURI(ctx context.Context, index_cb emitter.EmitterCallb
 		}
 
 		defer fh.Close()
-		
+
 		if em.filters != nil {
 
 			ok, err := em.filters.Apply(ctx, fh)

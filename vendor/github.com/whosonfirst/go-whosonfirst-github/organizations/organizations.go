@@ -2,11 +2,12 @@ package organizations
 
 import (
 	"fmt"
-	"github.com/google/go-github/v48/github"
-	"github.com/whosonfirst/go-whosonfirst-github/util"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/google/go-github/v48/github"
+	"github.com/whosonfirst/go-whosonfirst-github/util"	
 )
 
 type ListOptions struct {
