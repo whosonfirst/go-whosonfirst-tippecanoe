@@ -39,14 +39,14 @@ $> ./bin/features -h
 
 #### Local data
 
-Generate a MBTile database of all the records in a local checkout of the [sfomuseum-data-whosonfirst](https://github.com/sfomuseum-data/sfomuseum-data-whosonfirst) repository:
+Generate a PMTiles database of all the records in a local checkout of the [sfomuseum-data-whosonfirst](https://github.com/sfomuseum-data/sfomuseum-data-whosonfirst) repository:
 
 ```
 $> bin/features \
 	-writer-uri 'constant://?val=featurecollection://?writer=stdout://' \
 	/usr/local/data/sfomuseum-data-whosonfirst/ \
 	
-	| tippecanoe -zg -o wof.mbtiles
+	| tippecanoe -zg -o wof.pmtiles
 	
 For layer 0, using name "wof"
 2022/11/23 18:39:31 time to index paths (1) 22.630520632s
@@ -71,27 +71,27 @@ tile 2/2/1 size is 584143 with detail 10, >500000
   99.9%  9/409/233  
 ```
 
-To take advantage of parallel reads in `tippecanoe` use the [whosonfirst/go-writer-jsonl](https://github.com/whosonfirst/go-writer-jsonl) writer (instead of `featurecollection`). For example:
+To take advantage of parallel reads in `tippecanoe` be sure to use the [whosonfirst/go-writer-jsonl](https://github.com/whosonfirst/go-writer-jsonl) writer (instead of `featurecollection`). For example:
 
 ```
 $> ./bin/features \
 	-writer-uri 'constant://?val=jsonl://?writer=stdout://' \
 	/usr/local/data/whosonfirst-data-admin-us \
 
-	| tippecanoe -P -zg -o us.mbtiles --drop-densest-as-needed
+	| tippecanoe -P -zg -o us.pmtiles --drop-densest-as-needed
 ```
 
 #### Remote data
 
-Generate a MBTile database of all the records from repositories in the [sfomuseum-data](https://github.com/sfomuseum-data) organization with a prefix of `sfomuseum-data-maps`:
+Generate a PMTiles database of all the records from repositories in the [sfomuseum-data](https://github.com/sfomuseum-data) organization with a prefix of `sfomuseum-data-maps`:
 
 ```
 $> ./bin/features \
-	-writer-uri 'constant://?val=featurecollection://?writer=stdout://' \
+	-writer-uri 'constant://?val=jsonl://?writer=stdout://' \
 	-iterator-uri 'org:///tmp' \
 	'sfomuseum-data://?prefix=sfomuseum-data-maps' \
 	
-	| tippecanoe -zg -o sfomuseum.mbtiles
+	| tippecanoe -zg -o sfomuseum.pmtiles
 	
 For layer 0, using name "sfomuseum"
 2022/11/23 18:57:25 time to index paths (1) 2.758176132s
@@ -114,10 +114,7 @@ $> ./bin/features \
 	-writer-uri 'constant://?val=jsonl://?writer=stdout://' \
 	/usr/local/data/whosonfirst-data-admin-us/ \
 
-	| tippecanoe -P -z 12 -pf -pk -o us.mbtiles
-
-$> du -h us.mbtiles 
-608M	us.mbtiles
+	| tippecanoe -P -z 12 -pf -pk -o us.pmtiles
 ```
 
 Note: As of this writing the `go-whosonfirst-spatial-pmtiles` doesn't play well with alternate geometry features (which are included by specifying the `-include-alt-files` flag).
@@ -132,9 +129,11 @@ $> bin/features \
 	-require-polygons \
 	-spr-append-property 'properties.src:geom' \
 	-spr-append-property wof:hierarchy \
-	-writer-uri 'constant://?val=featurecollection://?writer=stdout://' \
+	-writer-uri 'constant://?val=jsonl://?writer=stdout://' \
 	/usr/local/data/sfomuseum-data-architecture/
 ```
+
+For a more complete example take a look at the [docker/build.sh](https://github.com/whosonfirst/go-whosonfirst-spatial-pmtiles/blob/main/docker/build.sh) script in the `go-whosonfirst-spatial-pmtiles` package.
 
 #### Filtering data
 
