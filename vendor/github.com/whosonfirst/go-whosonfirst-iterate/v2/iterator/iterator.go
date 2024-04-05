@@ -211,7 +211,7 @@ func (idx *Iterator) IterateURIs(ctx context.Context, uris ...string) error {
 			attempts := 0
 
 			// slog.Info("Walk", "uri", uri, "max_attempts", idx.max_attempts, "retry after", idx.retry_after)
-			
+
 			for attempts < idx.max_attempts {
 
 				// slog.Info("Walk URI", "uri", uri, "attempts", attempts)
@@ -220,16 +220,21 @@ func (idx *Iterator) IterateURIs(ctx context.Context, uris ...string) error {
 				if walk_err == nil {
 					break
 				}
-				
+
 				attempts += 1
 
 				if idx.retry_after != 0 && attempts < idx.max_attempts {
-					slog.Error("Failed to walk URI, retry after delay", "attempts", attempts, "uri", uri, "error", walk_err, "seconds", idx.retry_after)
-					time.Sleep(time.Duration(idx.retry_after) * time.Second)
+
+					time_to_sleep := idx.retry_after * attempts
+
+					slog.Error("Failed to walk URI, retry after delay", "attempts", attempts, "max_attempts", idx.max_attempts, "uri", uri, "error", walk_err, "seconds", time_to_sleep)
+
+					time.Sleep(time.Duration(time_to_sleep) * time.Second)
 				}
 			}
 
 			if walk_err != nil {
+				slog.Error("Failed to walk URI, triggering error", "uri", uri, "error", walk_err)
 				err_ch <- fmt.Errorf("Failed to walk '%s', %w", uri, walk_err)
 			}
 

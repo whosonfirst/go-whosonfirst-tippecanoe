@@ -400,15 +400,15 @@ github.com/whosonfirst/go-whosonfirst-github/util
 # github.com/whosonfirst/go-whosonfirst-iterate-git/v2 v2.1.6
 ## explicit; go 1.22
 github.com/whosonfirst/go-whosonfirst-iterate-git/v2
-# github.com/whosonfirst/go-whosonfirst-iterate-organization v1.2.0
+# github.com/whosonfirst/go-whosonfirst-iterate-organization v1.2.1
 ## explicit; go 1.22.1
 github.com/whosonfirst/go-whosonfirst-iterate-organization
-# github.com/whosonfirst/go-whosonfirst-iterate/v2 v2.4.0
+# github.com/whosonfirst/go-whosonfirst-iterate/v2 v2.4.1
 ## explicit; go 1.18
 github.com/whosonfirst/go-whosonfirst-iterate/v2/emitter
 github.com/whosonfirst/go-whosonfirst-iterate/v2/filters
 github.com/whosonfirst/go-whosonfirst-iterate/v2/iterator
-# github.com/whosonfirst/go-whosonfirst-iterwriter v0.1.1
+# github.com/whosonfirst/go-whosonfirst-iterwriter v0.1.2
 ## explicit; go 1.22.1
 github.com/whosonfirst/go-whosonfirst-iterwriter
 github.com/whosonfirst/go-whosonfirst-iterwriter/app/iterwriter

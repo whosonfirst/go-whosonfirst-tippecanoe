@@ -56,7 +56,7 @@ func NewEmitter(ctx context.Context, uri string) (Emitter, error) {
 	if scheme == "" {
 		return nil, fmt.Errorf("Emittter URI is missing scheme '%s'", uri)
 	}
-	
+
 	i, err := emitters.Driver(ctx, scheme)
 
 	if err != nil {
@@ -68,7 +68,7 @@ func NewEmitter(ctx context.Context, uri string) (Emitter, error) {
 	if fn == nil {
 		return nil, fmt.Errorf("Unregistered initialization function for '%s' scheme", scheme)
 	}
-	
+
 	return fn(ctx, uri)
 }
 

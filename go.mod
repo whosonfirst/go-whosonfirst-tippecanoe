@@ -7,9 +7,9 @@ require (
 	github.com/sfomuseum/go-timings v1.2.1
 	github.com/tidwall/gjson v1.17.1
 	github.com/tidwall/sjson v1.2.5
-	github.com/whosonfirst/go-whosonfirst-iterate-organization v1.2.0
-	github.com/whosonfirst/go-whosonfirst-iterate/v2 v2.4.0
-	github.com/whosonfirst/go-whosonfirst-iterwriter v0.1.1
+	github.com/whosonfirst/go-whosonfirst-iterate-organization v1.2.1
+	github.com/whosonfirst/go-whosonfirst-iterate/v2 v2.4.1
+	github.com/whosonfirst/go-whosonfirst-iterwriter v0.1.2
 	github.com/whosonfirst/go-whosonfirst-spr/v2 v2.3.7
 	github.com/whosonfirst/go-whosonfirst-uri v1.3.0
 	github.com/whosonfirst/go-writer-featurecollection/v3 v3.0.2
