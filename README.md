@@ -151,6 +151,8 @@ It seems as this behaviour can be adjusted by configuring the `http.Client` inst
 
 As with all things the details will vary depending on the environent you are working in. You might be able to get away with `?_max_procs=3` or higher but the point is there is an upper limit to the number of (large) repositories that can be read over the wire in parallel.
 
+Anecedotaly, generating a PMTiles database for all the `whosonfirst-data-admin-` repositories, at zoom level 13, on a machine with 8 cores (see notes above) takes between 12-24 hours and produces a final database that is a little over 9GB in size. At least half that time appears to be `tippecanoe` doing it's thing. Any tips or pointers on how to speed things up would be welcome but those numbers may just be "the cost of doing business" for the time being.
+
 ## See also
 
 * https://github.com/whosonfirst/go-whosonfirst-iterwriter
