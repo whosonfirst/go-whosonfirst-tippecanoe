@@ -141,6 +141,16 @@ You can limit features to be included in the final output by appending filtering
 
 * https://github.com/whosonfirst/go-whosonfirst-iterate#filters
 
+#### Considerations when reading data from an `org://` iterator
+
+If you are fetching data from multiple GitHub repositories using the `org://` iterator you may want to assign the `?_max_procs=2` parameter (as in `org:///tmp?_max_procs=2`) especially if you are running the code from a machine with lots of CPUs. By default the `go-whosonfirst-iterator` code will process as many sources are there are CPUs concurrently.
+
+Normally this is not a problem but if you are fetching very large repositories (like `whosonfirst-data-admin-us`) and, say, seven other small repositories (on an 8-CPU machine) that will cause enough network traffic that Go will eventually start emitting "STREAM" errors and the iterator will fail. 
+
+It seems as this behaviour can be adjusted by configuring the `http.Client` instance but I haven't figured out where, or even if it's possible, to do this in the underlying Git package.
+
+As with all things the details will vary depending on the environent you are working in. You might be able to get away with `?_max_procs=3` or higher but the point is there is an upper limit to the number of (large) repositories that can be read over the wire in parallel.
+
 ## See also
 
 * https://github.com/whosonfirst/go-whosonfirst-iterwriter
