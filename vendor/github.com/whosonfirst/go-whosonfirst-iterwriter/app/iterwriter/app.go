@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
 	"strings"
@@ -19,7 +20,11 @@ import (
 type RunOptions struct {
 	CallbackFunc  iterwriter.IterwriterCallbackFunc
 	Writer        writer.Writer
+	IteratorURI   string
 	IteratorPaths []string
+	MonitorURI    string
+	MonitorWriter io.Writer
+	Verbose       bool
 }
 
 func Run(ctx context.Context, logger *slog.Logger) error {
@@ -61,7 +66,11 @@ func DefaultOptionsFromFlagSet(fs *flag.FlagSet, parsed bool) (*RunOptions, erro
 
 	opts := &RunOptions{
 		CallbackFunc:  cb_func,
+		IteratorURI:   iterator_uri,
 		IteratorPaths: iterator_paths,
+		MonitorURI:    monitor_uri,
+		MonitorWriter: os.Stderr,
+		Verbose:       verbose,
 	}
 
 	return opts, nil
@@ -70,6 +79,11 @@ func DefaultOptionsFromFlagSet(fs *flag.FlagSet, parsed bool) (*RunOptions, erro
 func RunWithOptions(ctx context.Context, opts *RunOptions, logger *slog.Logger) error {
 
 	slog.SetDefault(logger)
+
+	if opts.Verbose {
+		slog.SetLogLoggerLevel(slog.LevelDebug)
+		logger.Debug("Verbose (debug) logging enabled")
+	}
 
 	var mw writer.Writer
 
@@ -111,18 +125,18 @@ func RunWithOptions(ctx context.Context, opts *RunOptions, logger *slog.Logger) 
 		mw = _mw
 	}
 
-	monitor, err := timings.NewMonitor(ctx, monitor_uri)
+	monitor, err := timings.NewMonitor(ctx, opts.MonitorURI)
 
 	if err != nil {
 		return fmt.Errorf("Failed to create monitor, %w", err)
 	}
 
-	monitor.Start(ctx, os.Stdout)
+	monitor.Start(ctx, opts.MonitorWriter)
 	defer monitor.Stop(ctx)
 
 	iter_cb := opts.CallbackFunc(mw, monitor)
 
-	err = iterwriter.IterateWithWriterAndCallback(ctx, mw, iter_cb, monitor, iterator_uri, opts.IteratorPaths...)
+	err = iterwriter.IterateWithWriterAndCallback(ctx, mw, iter_cb, monitor, opts.IteratorURI, opts.IteratorPaths...)
 
 	if err != nil {
 		return fmt.Errorf("Failed to iterate with writer, %w", err)

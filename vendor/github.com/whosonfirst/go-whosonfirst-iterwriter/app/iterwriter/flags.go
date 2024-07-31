@@ -11,6 +11,7 @@ var writer_uris multi.MultiCSVString
 var iterator_uri string
 var monitor_uri string
 var forgiving bool
+var verbose bool
 
 func DefaultFlagSet() *flag.FlagSet {
 
@@ -20,5 +21,6 @@ func DefaultFlagSet() *flag.FlagSet {
 	fs.StringVar(&iterator_uri, "iterator-uri", "repo://", "A valid whosonfirst/go-whosonfirst-iterate/v3 URI.")
 	fs.StringVar(&monitor_uri, "monitor-uri", "counter://PT60S", "A valid sfomuseum/go-timings URI.")
 	fs.BoolVar(&forgiving, "forgiving", false, "Be \"forgiving\" of failed writes, logging the issue(s) but not triggering errors")
+	fs.BoolVar(&verbose, "verbose", false, "Enable verbose (debug) logging")
 	return fs
 }
