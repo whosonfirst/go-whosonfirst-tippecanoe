@@ -6,7 +6,6 @@ import (
 	"context"
 	"fmt"
 	awsmiddleware "github.com/aws/aws-sdk-go-v2/aws/middleware"
-	"github.com/aws/aws-sdk-go-v2/aws/signer/v4"
 	"github.com/aws/aws-sdk-go-v2/service/ssm/types"
 	"github.com/aws/smithy-go/middleware"
 	smithyhttp "github.com/aws/smithy-go/transport/http"
@@ -90,25 +89,25 @@ func (c *Client) addOperationGetInventorySchemaMiddlewares(stack *middleware.Sta
 	if err = addSetLoggerMiddleware(stack, options); err != nil {
 		return err
 	}
-	if err = awsmiddleware.AddClientRequestIDMiddleware(stack); err != nil {
+	if err = addClientRequestID(stack); err != nil {
 		return err
 	}
-	if err = smithyhttp.AddComputeContentLengthMiddleware(stack); err != nil {
+	if err = addComputeContentLength(stack); err != nil {
 		return err
 	}
 	if err = addResolveEndpointMiddleware(stack, options); err != nil {
 		return err
 	}
-	if err = v4.AddComputePayloadSHA256Middleware(stack); err != nil {
+	if err = addComputePayloadSHA256(stack); err != nil {
 		return err
 	}
-	if err = addRetryMiddlewares(stack, options); err != nil {
+	if err = addRetry(stack, options); err != nil {
 		return err
 	}
-	if err = awsmiddleware.AddRawResponseToMetadata(stack); err != nil {
+	if err = addRawResponseToMetadata(stack); err != nil {
 		return err
 	}
-	if err = awsmiddleware.AddRecordResponseTiming(stack); err != nil {
+	if err = addRecordResponseTiming(stack); err != nil {
 		return err
 	}
 	if err = addClientUserAgent(stack, options); err != nil {
@@ -123,10 +122,16 @@ func (c *Client) addOperationGetInventorySchemaMiddlewares(stack *middleware.Sta
 	if err = addSetLegacyContextSigningOptionsMiddleware(stack); err != nil {
 		return err
 	}
+	if err = addTimeOffsetBuild(stack, c); err != nil {
+		return err
+	}
+	if err = addUserAgentRetryMode(stack, options); err != nil {
+		return err
+	}
 	if err = stack.Initialize.Add(newServiceMetadataMiddleware_opGetInventorySchema(options.Region), middleware.Before); err != nil {
 		return err
 	}
-	if err = awsmiddleware.AddRecursionDetection(stack); err != nil {
+	if err = addRecursionDetection(stack); err != nil {
 		return err
 	}
 	if err = addRequestIDRetrieverMiddleware(stack); err != nil {
@@ -143,14 +148,6 @@ func (c *Client) addOperationGetInventorySchemaMiddlewares(stack *middleware.Sta
 	}
 	return nil
 }
-
-// GetInventorySchemaAPIClient is a client that implements the GetInventorySchema
-// operation.
-type GetInventorySchemaAPIClient interface {
-	GetInventorySchema(context.Context, *GetInventorySchemaInput, ...func(*Options)) (*GetInventorySchemaOutput, error)
-}
-
-var _ GetInventorySchemaAPIClient = (*Client)(nil)
 
 // GetInventorySchemaPaginatorOptions is the paginator options for
 // GetInventorySchema
@@ -217,6 +214,9 @@ func (p *GetInventorySchemaPaginator) NextPage(ctx context.Context, optFns ...fu
 	}
 	params.MaxResults = limit
 
+	optFns = append([]func(*Options){
+		addIsPaginatorUserAgent,
+	}, optFns...)
 	result, err := p.client.GetInventorySchema(ctx, &params, optFns...)
 	if err != nil {
 		return nil, err
@@ -235,6 +235,14 @@ func (p *GetInventorySchemaPaginator) NextPage(ctx context.Context, optFns ...fu
 
 	return result, nil
 }
+
+// GetInventorySchemaAPIClient is a client that implements the GetInventorySchema
+// operation.
+type GetInventorySchemaAPIClient interface {
+	GetInventorySchema(context.Context, *GetInventorySchemaInput, ...func(*Options)) (*GetInventorySchemaOutput, error)
+}
+
+var _ GetInventorySchemaAPIClient = (*Client)(nil)
 
 func newServiceMetadataMiddleware_opGetInventorySchema(region string) *awsmiddleware.RegisterServiceMetadata {
 	return &awsmiddleware.RegisterServiceMetadata{

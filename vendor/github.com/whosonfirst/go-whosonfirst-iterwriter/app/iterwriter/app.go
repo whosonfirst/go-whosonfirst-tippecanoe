@@ -34,7 +34,7 @@ func Run(ctx context.Context, logger *slog.Logger) error {
 
 func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *slog.Logger) error {
 
-	opts, err := DefaultOptionsFromFlagSet(fs, true)
+	opts, err := DefaultOptionsFromFlagSet(fs, false)
 
 	if err != nil {
 		return fmt.Errorf("Failed to derive options from flags, %w", err)

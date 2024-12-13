@@ -6,7 +6,6 @@ import (
 	"context"
 	"fmt"
 	awsmiddleware "github.com/aws/aws-sdk-go-v2/aws/middleware"
-	"github.com/aws/aws-sdk-go-v2/aws/signer/v4"
 	"github.com/aws/aws-sdk-go-v2/service/ssm/types"
 	"github.com/aws/smithy-go/middleware"
 	smithyhttp "github.com/aws/smithy-go/transport/http"
@@ -30,11 +29,21 @@ func (c *Client) DescribePatchBaselines(ctx context.Context, params *DescribePat
 
 type DescribePatchBaselinesInput struct {
 
-	// Each element in the array is a structure containing a key-value pair. Supported
-	// keys for DescribePatchBaselines include the following:
-	//   - NAME_PREFIX Sample values: AWS- | My-
-	//   - OWNER Sample values: AWS | Self
-	//   - OPERATING_SYSTEM Sample values: AMAZON_LINUX | SUSE | WINDOWS
+	// Each element in the array is a structure containing a key-value pair.
+	//
+	// Supported keys for DescribePatchBaselines include the following:
+	//
+	//   - NAME_PREFIX
+	//
+	// Sample values: AWS- | My-
+	//
+	//   - OWNER
+	//
+	// Sample values: AWS | Self
+	//
+	//   - OPERATING_SYSTEM
+	//
+	// Sample values: AMAZON_LINUX | SUSE | WINDOWS
 	Filters []types.PatchOrchestratorFilter
 
 	// The maximum number of patch baselines to return (per page).
@@ -84,25 +93,25 @@ func (c *Client) addOperationDescribePatchBaselinesMiddlewares(stack *middleware
 	if err = addSetLoggerMiddleware(stack, options); err != nil {
 		return err
 	}
-	if err = awsmiddleware.AddClientRequestIDMiddleware(stack); err != nil {
+	if err = addClientRequestID(stack); err != nil {
 		return err
 	}
-	if err = smithyhttp.AddComputeContentLengthMiddleware(stack); err != nil {
+	if err = addComputeContentLength(stack); err != nil {
 		return err
 	}
 	if err = addResolveEndpointMiddleware(stack, options); err != nil {
 		return err
 	}
-	if err = v4.AddComputePayloadSHA256Middleware(stack); err != nil {
+	if err = addComputePayloadSHA256(stack); err != nil {
 		return err
 	}
-	if err = addRetryMiddlewares(stack, options); err != nil {
+	if err = addRetry(stack, options); err != nil {
 		return err
 	}
-	if err = awsmiddleware.AddRawResponseToMetadata(stack); err != nil {
+	if err = addRawResponseToMetadata(stack); err != nil {
 		return err
 	}
-	if err = awsmiddleware.AddRecordResponseTiming(stack); err != nil {
+	if err = addRecordResponseTiming(stack); err != nil {
 		return err
 	}
 	if err = addClientUserAgent(stack, options); err != nil {
@@ -117,10 +126,16 @@ func (c *Client) addOperationDescribePatchBaselinesMiddlewares(stack *middleware
 	if err = addSetLegacyContextSigningOptionsMiddleware(stack); err != nil {
 		return err
 	}
+	if err = addTimeOffsetBuild(stack, c); err != nil {
+		return err
+	}
+	if err = addUserAgentRetryMode(stack, options); err != nil {
+		return err
+	}
 	if err = stack.Initialize.Add(newServiceMetadataMiddleware_opDescribePatchBaselines(options.Region), middleware.Before); err != nil {
 		return err
 	}
-	if err = awsmiddleware.AddRecursionDetection(stack); err != nil {
+	if err = addRecursionDetection(stack); err != nil {
 		return err
 	}
 	if err = addRequestIDRetrieverMiddleware(stack); err != nil {
@@ -137,14 +152,6 @@ func (c *Client) addOperationDescribePatchBaselinesMiddlewares(stack *middleware
 	}
 	return nil
 }
-
-// DescribePatchBaselinesAPIClient is a client that implements the
-// DescribePatchBaselines operation.
-type DescribePatchBaselinesAPIClient interface {
-	DescribePatchBaselines(context.Context, *DescribePatchBaselinesInput, ...func(*Options)) (*DescribePatchBaselinesOutput, error)
-}
-
-var _ DescribePatchBaselinesAPIClient = (*Client)(nil)
 
 // DescribePatchBaselinesPaginatorOptions is the paginator options for
 // DescribePatchBaselines
@@ -210,6 +217,9 @@ func (p *DescribePatchBaselinesPaginator) NextPage(ctx context.Context, optFns .
 	}
 	params.MaxResults = limit
 
+	optFns = append([]func(*Options){
+		addIsPaginatorUserAgent,
+	}, optFns...)
 	result, err := p.client.DescribePatchBaselines(ctx, &params, optFns...)
 	if err != nil {
 		return nil, err
@@ -228,6 +238,14 @@ func (p *DescribePatchBaselinesPaginator) NextPage(ctx context.Context, optFns .
 
 	return result, nil
 }
+
+// DescribePatchBaselinesAPIClient is a client that implements the
+// DescribePatchBaselines operation.
+type DescribePatchBaselinesAPIClient interface {
+	DescribePatchBaselines(context.Context, *DescribePatchBaselinesInput, ...func(*Options)) (*DescribePatchBaselinesOutput, error)
+}
+
+var _ DescribePatchBaselinesAPIClient = (*Client)(nil)
 
 func newServiceMetadataMiddleware_opDescribePatchBaselines(region string) *awsmiddleware.RegisterServiceMetadata {
 	return &awsmiddleware.RegisterServiceMetadata{
