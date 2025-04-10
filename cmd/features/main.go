@@ -1,28 +1,22 @@
 package main
 
 import (
+	"context"
+	"log"
+
 	_ "github.com/whosonfirst/go-whosonfirst-iterate-organization"
 	_ "github.com/whosonfirst/go-writer-featurecollection/v3"
 	_ "github.com/whosonfirst/go-writer-jsonl/v3"
-)
 
-import (
-	"context"
-	"log/slog"
-	"os"
-	
-	"github.com/whosonfirst/go-whosonfirst-tippecanoe/app/features"	
+	"github.com/whosonfirst/go-whosonfirst-tippecanoe/app/features"
 )
 
 func main() {
 
 	ctx := context.Background()
-	logger := slog.Default()
-
-	err := features.Run(ctx, logger)
+	err := features.Run(ctx)
 
 	if err != nil {
-		logger.Error("Failed to run iterwriter", "error", err)
-		os.Exit(1)
+		log.Fatalf("Failed to derive features, %v", err)
 	}
 }

@@ -3,8 +3,8 @@ package features
 import (
 	"flag"
 	"github.com/sfomuseum/go-flags/multi"
-	
-	"github.com/whosonfirst/go-whosonfirst-iterwriter/app/iterwriter"
+
+	"github.com/whosonfirst/go-whosonfirst-iterwriter/v3/app/iterwriter"
 )
 
 var as_spr bool

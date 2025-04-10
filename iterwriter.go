@@ -12,10 +12,10 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 	"github.com/whosonfirst/go-whosonfirst-iterate/v2/emitter"
-	"github.com/whosonfirst/go-whosonfirst-iterwriter"
+	"github.com/whosonfirst/go-whosonfirst-iterwriter/v3"
 	"github.com/whosonfirst/go-whosonfirst-spr/v2"
 	"github.com/whosonfirst/go-whosonfirst-uri"
-	"github.com/whosonfirst/go-writer/v3"	
+	"github.com/whosonfirst/go-writer/v3"
 )
 
 type IterwriterCallbackFuncBuilderOptions struct {
@@ -23,7 +23,7 @@ type IterwriterCallbackFuncBuilderOptions struct {
 	AsSPR               bool
 	IncludeAltFiles     bool
 	AppendSPRProperties []string
-	Forgiving bool
+	Forgiving           bool
 }
 
 func IterwriterCallbackFuncBuilder(opts *IterwriterCallbackFuncBuilderOptions) iterwriter.IterwriterCallbackFunc {
@@ -36,7 +36,7 @@ func IterwriterCallbackFuncBuilder(opts *IterwriterCallbackFuncBuilderOptions) i
 
 			logger := slog.Default()
 			logger = logger.With("path", path)
-			
+
 			id, uri_args, err := uri.ParseURI(path)
 
 			if err != nil {
@@ -44,7 +44,7 @@ func IterwriterCallbackFuncBuilder(opts *IterwriterCallbackFuncBuilderOptions) i
 			}
 
 			logger = logger.With("id", id)
-			
+
 			if uri_args.IsAlternate && !opts.IncludeAltFiles {
 				logger.Debug("Is alternate geometry, skipping")
 				return nil
@@ -57,18 +57,18 @@ func IterwriterCallbackFuncBuilder(opts *IterwriterCallbackFuncBuilderOptions) i
 			}
 
 			logger = logger.With("rel_path", rel_path)
-			
+
 			if opts.RequirePolygon || opts.AsSPR {
 
 				body, err := io.ReadAll(r)
 
 				if err != nil {
 					logger.Error("Failed to read body", "error", err)
-					
+
 					if opts.Forgiving {
 						return nil
 					}
-					
+
 					return fmt.Errorf("Failed to read body for %s, %w", path, err)
 				}
 
@@ -89,13 +89,13 @@ func IterwriterCallbackFuncBuilder(opts *IterwriterCallbackFuncBuilderOptions) i
 					s, err := spr.WhosOnFirstSPR(body)
 
 					if err != nil {
-						
+
 						logger.Error("Failed to derive SPR", "error", err)
 
 						if opts.Forgiving {
 							return nil
 						}
-						
+
 						return fmt.Errorf("Failed to create SPR for %s, %w", path, err)
 					}
 
@@ -108,11 +108,11 @@ func IterwriterCallbackFuncBuilder(opts *IterwriterCallbackFuncBuilderOptions) i
 
 					if err != nil {
 						logger.Error("Failed to update properties with SPR", "error", err)
-						
+
 						if opts.Forgiving {
 							return nil
 						}
-						
+
 						return fmt.Errorf("Failed to update properties for %s, %w", path, err)
 					}
 
@@ -132,13 +132,13 @@ func IterwriterCallbackFuncBuilder(opts *IterwriterCallbackFuncBuilderOptions) i
 								body, err = sjson.SetBytes(body, abs_path, p_rsp.Value())
 
 								if err != nil {
-									
+
 									logger.Error("Failed to append property to SPR", "property", abs_path, "error", err)
-									
+
 									if opts.Forgiving {
 										return nil
 									}
-									
+
 									return fmt.Errorf("Failed to assign %s to properties, %w", abs_path, err)
 								}
 							}
@@ -160,7 +160,7 @@ func IterwriterCallbackFuncBuilder(opts *IterwriterCallbackFuncBuilderOptions) i
 				if opts.Forgiving {
 					return nil
 				}
-				
+
 				return fmt.Errorf("Failed to write %s, %v", path, err)
 			}
 
