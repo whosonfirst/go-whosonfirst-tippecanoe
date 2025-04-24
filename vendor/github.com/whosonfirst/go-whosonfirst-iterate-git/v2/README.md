@@ -2,7 +2,7 @@
 
 Go package implementing go-whosonfirst-iterate/emitter functionality for Git repositories.
 
-## Important
+## Documentation
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/whosonfirst/go-whosonfirst-iterate-git.svg)](https://pkg.go.dev/github.com/whosonfirst/go-whosonfirst-iterate-git)
 
@@ -15,14 +15,16 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	_ "github.com/whosonfirst/go-whosonfirst-iterate-git/v2"
-	"github.com/whosonfirst/go-whosonfirst-iterate/v2/emitter"
-	"github.com/whosonfirst/go-whosonfirst-iterate/v2/iterator"
 	"io"
 	"log"
 	"os"
 	"strings"
 	"sync/atomic"
+
+	_ "github.com/whosonfirst/go-whosonfirst-iterate-git/v2"
+	
+	"github.com/whosonfirst/go-whosonfirst-iterate/v2/emitter"
+	"github.com/whosonfirst/go-whosonfirst-iterate/v2/iterator"
 )
 
 func main() {
@@ -61,6 +63,23 @@ func main() {
 ```
 
 _Error handling omitted for the sake of brevity._
+
+## Emitter URIs
+
+```
+git://{PATH}?{PARAMETERS}
+```
+
+Where `{PATH}` is an optional path on disk where a repository will be clone to (default is to clone repository in memory) and `{PARAMETERS}` may be:
+
+| Name | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `include` | string | no | Zero or more `aaronland/go-json-query` query strings containing rules that must match for a document to be considered for further processing. |
+| `exclude` | string | no | Zero or more `aaronland/go-json-query`	query strings containing rules that if matched will prevent a document from being considered for further processing. |
+| `include_mode` | string | no | A valid `aaronland/go-json-query` query mode string for testing inclusion rules. Default is "AND". |
+| `exclude_mode` | string | no | A valid `aaronland/go-json-query` query mode string for testing exclusion rules. Default is "AND". |
+| `preserve` | boolean | no | A boolean value indicating whether a Git repository (cloned to disk) should not be removed after processing. Default is false. |
+| `depth` | int | no | An integer value indicating the number of commits to fetch. Default is 1. |
 
 ## Tools
 
