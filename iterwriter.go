@@ -27,8 +27,6 @@ type IterwriterCallbackFuncBuilderOptions struct {
 
 func IterwriterCallbackFuncBuilder(opts *IterwriterCallbackFuncBuilderOptions) iterwriter.IterwriterCallback {
 
-	// wr, logger, monitor are created in whosonfirst/go-whosonfirst-iterwriter/app/iterwriter
-
 	fn := func(ctx context.Context, rec *iterate.Record, wr writer.Writer) error {
 
 		logger := slog.Default()
