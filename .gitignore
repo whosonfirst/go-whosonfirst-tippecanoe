@@ -2,3 +2,4 @@
 bin
 *.mbtiles
 *.pmtiles
+go.work*
