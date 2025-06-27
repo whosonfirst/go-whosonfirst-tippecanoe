@@ -7,7 +7,7 @@ import (
 
 	"github.com/sfomuseum/go-flags/flagset"
 	"github.com/sfomuseum/go-flags/lookup"
-	"github.com/whosonfirst/go-whosonfirst-iterwriter/v3/app/iterwriter"
+	"github.com/whosonfirst/go-whosonfirst-iterwriter/v4/app/iterwriter"
 	"github.com/whosonfirst/go-whosonfirst-tippecanoe"
 )
 

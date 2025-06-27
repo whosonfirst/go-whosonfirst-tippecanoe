@@ -8,11 +8,10 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/sfomuseum/go-timings"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
-	"github.com/whosonfirst/go-whosonfirst-iterate/v2/emitter"
-	"github.com/whosonfirst/go-whosonfirst-iterwriter/v3"
+	"github.com/whosonfirst/go-whosonfirst-iterate/v3"
+	"github.com/whosonfirst/go-whosonfirst-iterwriter/v4"
 	"github.com/whosonfirst/go-whosonfirst-spr/v2"
 	"github.com/whosonfirst/go-whosonfirst-uri"
 	"github.com/whosonfirst/go-writer/v3"
@@ -26,150 +25,145 @@ type IterwriterCallbackFuncBuilderOptions struct {
 	Forgiving           bool
 }
 
-func IterwriterCallbackFuncBuilder(opts *IterwriterCallbackFuncBuilderOptions) iterwriter.IterwriterCallbackFunc {
+func IterwriterCallbackFuncBuilder(opts *IterwriterCallbackFuncBuilderOptions) iterwriter.IterwriterCallback {
 
-	// wr, logger, monitor are created in whosonfirst/go-whosonfirst-iterwriter/app/iterwriter
+	fn := func(ctx context.Context, rec *iterate.Record, wr writer.Writer) error {
 
-	iterwriter_cb := func(wr writer.Writer, monitor timings.Monitor) emitter.EmitterCallbackFunc {
+		logger := slog.Default()
+		logger = logger.With("rec.Path", rec.Path)
 
-		iter_cb := func(ctx context.Context, path string, r io.ReadSeeker, args ...interface{}) error {
+		id, uri_args, err := uri.ParseURI(rec.Path)
 
-			logger := slog.Default()
-			logger = logger.With("path", path)
+		if err != nil {
+			return fmt.Errorf("Unable to parse %s, %w", rec.Path, err)
+		}
 
-			id, uri_args, err := uri.ParseURI(path)
+		logger = logger.With("id", id)
 
-			if err != nil {
-				return fmt.Errorf("Unable to parse %s, %w", path, err)
-			}
+		if uri_args.IsAlternate && !opts.IncludeAltFiles {
+			logger.Debug("Is alternate geometry, skipping")
+			return nil
+		}
 
-			logger = logger.With("id", id)
+		rel_path, err := uri.Id2RelPath(id, uri_args)
 
-			if uri_args.IsAlternate && !opts.IncludeAltFiles {
-				logger.Debug("Is alternate geometry, skipping")
-				return nil
-			}
+		if err != nil {
+			return fmt.Errorf("Unable to derive relative (WOF) path for %s, %w", rec.Path, err)
+		}
 
-			rel_path, err := uri.Id2RelPath(id, uri_args)
+		logger = logger.With("rel_path", rel_path)
 
-			if err != nil {
-				return fmt.Errorf("Unable to derive relative (WOF) path for %s, %w", path, err)
-			}
+		var wr_body io.ReadSeeker
+		wr_body = rec.Body
 
-			logger = logger.With("rel_path", rel_path)
+		if opts.RequirePolygon || opts.AsSPR {
 
-			if opts.RequirePolygon || opts.AsSPR {
-
-				body, err := io.ReadAll(r)
-
-				if err != nil {
-					logger.Error("Failed to read body", "error", err)
-
-					if opts.Forgiving {
-						return nil
-					}
-
-					return fmt.Errorf("Failed to read body for %s, %w", path, err)
-				}
-
-				if opts.RequirePolygon {
-
-					geom_rsp := gjson.GetBytes(body, "geometry.type")
-
-					switch geom_rsp.String() {
-					case "Polygon", "MultiPolygon":
-						// pass
-					default:
-						return nil
-					}
-				}
-
-				if opts.AsSPR && !uri_args.IsAlternate {
-
-					s, err := spr.WhosOnFirstSPR(body)
-
-					if err != nil {
-
-						logger.Error("Failed to derive SPR", "error", err)
-
-						if opts.Forgiving {
-							return nil
-						}
-
-						return fmt.Errorf("Failed to create SPR for %s, %w", path, err)
-					}
-
-					// ideally use go-whosonfirst-spatial.PropertiesResponseResultsWithStandardPlacesResults here
-					// but not sure what the what is yet
-
-					old_props := gjson.GetBytes(body, "properties")
-
-					body, err = sjson.SetBytes(body, "properties", s)
-
-					if err != nil {
-						logger.Error("Failed to update properties with SPR", "error", err)
-
-						if opts.Forgiving {
-							return nil
-						}
-
-						return fmt.Errorf("Failed to update properties for %s, %w", path, err)
-					}
-
-					if len(opts.AppendSPRProperties) > 0 {
-
-						for _, path := range opts.AppendSPRProperties {
-
-							// Because we are deriving this from old_props and not body
-							rel_path := strings.Replace(path, "properties.", "", 1)
-
-							p_rsp := old_props.Get(rel_path)
-
-							if p_rsp.Exists() {
-
-								abs_path := fmt.Sprintf("properties.%s", rel_path)
-
-								body, err = sjson.SetBytes(body, abs_path, p_rsp.Value())
-
-								if err != nil {
-
-									logger.Error("Failed to append property to SPR", "property", abs_path, "error", err)
-
-									if opts.Forgiving {
-										return nil
-									}
-
-									return fmt.Errorf("Failed to assign %s to properties, %w", abs_path, err)
-								}
-							}
-						}
-
-					}
-				}
-
-				br := bytes.NewReader(body)
-				r = br
-			}
-
-			_, err = wr.Write(ctx, rel_path, r)
+			body, err := io.ReadAll(rec.Body)
 
 			if err != nil {
-
-				logger.Error("Failed to write document", "error", err)
+				logger.Error("Failed to read body", "error", err)
 
 				if opts.Forgiving {
 					return nil
 				}
 
-				return fmt.Errorf("Failed to write %s, %v", path, err)
+				return fmt.Errorf("Failed to read body for %s, %w", rec.Path, err)
 			}
 
-			go monitor.Signal(ctx)
-			return nil
+			if opts.RequirePolygon {
+
+				geom_rsp := gjson.GetBytes(body, "geometry.type")
+
+				switch geom_rsp.String() {
+				case "Polygon", "MultiPolygon":
+					// pass
+				default:
+					return nil
+				}
+			}
+
+			if opts.AsSPR && !uri_args.IsAlternate {
+
+				s, err := spr.WhosOnFirstSPR(body)
+
+				if err != nil {
+
+					logger.Error("Failed to derive SPR", "error", err)
+
+					if opts.Forgiving {
+						return nil
+					}
+
+					return fmt.Errorf("Failed to create SPR for %s, %w", rec.Path, err)
+				}
+
+				// ideally use go-whosonfirst-spatial.PropertiesResponseResultsWithStandardPlacesResults here
+				// but not sure what the what is yet
+
+				old_props := gjson.GetBytes(body, "properties")
+
+				body, err = sjson.SetBytes(body, "properties", s)
+
+				if err != nil {
+					logger.Error("Failed to update properties with SPR", "error", err)
+
+					if opts.Forgiving {
+						return nil
+					}
+
+					return fmt.Errorf("Failed to update properties for %s, %w", rec.Path, err)
+				}
+
+				if len(opts.AppendSPRProperties) > 0 {
+
+					for _, path := range opts.AppendSPRProperties {
+
+						// Because we are deriving this from old_props and not body
+						rel_path := strings.Replace(path, "properties.", "", 1)
+
+						p_rsp := old_props.Get(rel_path)
+
+						if p_rsp.Exists() {
+
+							abs_path := fmt.Sprintf("properties.%s", rel_path)
+
+							body, err = sjson.SetBytes(body, abs_path, p_rsp.Value())
+
+							if err != nil {
+
+								logger.Error("Failed to append property to SPR", "property", abs_path, "error", err)
+
+								if opts.Forgiving {
+									return nil
+								}
+
+								return fmt.Errorf("Failed to assign %s to properties, %w", abs_path, err)
+							}
+						}
+					}
+
+				}
+			}
+
+			br := bytes.NewReader(body)
+			wr_body = br
 		}
 
-		return iter_cb
+		_, err = wr.Write(ctx, rel_path, wr_body)
+
+		if err != nil {
+
+			logger.Error("Failed to write document", "error", err)
+
+			if opts.Forgiving {
+				return nil
+			}
+
+			return fmt.Errorf("Failed to write %s, %v", rec.Path, err)
+		}
+
+		return nil
 	}
 
-	return iterwriter_cb
+	return fn
 }
