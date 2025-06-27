@@ -13,6 +13,7 @@ import (
 	"regexp"
 	"runtime"
 	"strconv"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -41,6 +42,10 @@ type Iterator struct {
 	exclude_alt_files bool
 	max_attempts      int
 	retry_after       int
+	// skip records (specifically their relative URI) that have already been processed
+	dedupe bool
+	// lookup table to track records (specifically their relative URI) that have been processed
+	dedupe_map *sync.Map
 }
 
 // NewIterator() returns a new `Iterator` instance derived from 'emitter_uri' and 'emitter_cb'. The former is expected
@@ -48,6 +53,7 @@ type Iterator struct {
 // implementation of the `emitter.Emitter` interface. The following iterator-specific query parameters are also accepted:
 // * `?_max_procs=` Explicitly set the number maximum processes to use for iterating documents simultaneously. (Default is the value of `runtime.NumCPU()`.)
 // * `?_exclude=` A valid regular expresion used to test and exclude (if matching) the paths of documents as they are iterated through.
+// * `?_dedupe=` A boolean value to track and skip records (specifically their relative URI) that have already been processed.
 func NewIterator(ctx context.Context, emitter_uri string, emitter_cb emitter.EmitterCallbackFunc) (*Iterator, error) {
 
 	idx, err := emitter.NewEmitter(ctx, emitter_uri)
@@ -155,6 +161,21 @@ func NewIterator(ctx context.Context, emitter_uri string, emitter_cb emitter.Emi
 		i.exclude_alt_files = v
 	}
 
+	if q.Has("_dedupe") {
+
+		v, err := strconv.ParseBool(q.Get("_dedupe"))
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to parse '_dedupe' parameter, %w", err)
+		}
+
+		if v {
+			i.dedupe = true
+			i.dedupe_map = new(sync.Map)
+		}
+
+	}
+
 	return &i, nil
 }
 
@@ -192,6 +213,28 @@ func (idx *Iterator) IterateURIs(ctx context.Context, uris ...string) error {
 			}
 
 			if is_alt {
+				return nil
+			}
+		}
+
+		if idx.dedupe {
+
+			id, uri_args, err := uri.ParseURI(path)
+
+			if err != nil {
+				return fmt.Errorf("Failed to parse %s, %w", path, err)
+			}
+
+			rel_path, err := uri.Id2RelPath(id, uri_args)
+
+			if err != nil {
+				return fmt.Errorf("Failed to derive relative path for %s, %w", path, err)
+			}
+
+			_, seen := idx.dedupe_map.LoadOrStore(rel_path, true)
+
+			if seen {
+				slog.Debug("Skip record", "path", rel_path)
 				return nil
 			}
 		}

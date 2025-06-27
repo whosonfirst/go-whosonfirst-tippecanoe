@@ -14,6 +14,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-github/organizations"
 	"github.com/whosonfirst/go-whosonfirst-iterate/v2/emitter"
 	"github.com/whosonfirst/go-whosonfirst-iterate/v2/iterator"
+	wof_uri "github.com/whosonfirst/go-whosonfirst-uri"	
 )
 
 func init() {
@@ -54,18 +55,25 @@ func NewOrganizationEmitter(ctx context.Context, uri string) (emitter.Emitter, e
 		query:  q,
 	}
 
-	if q.Has("_dedupe") {
+	// Note this is "?dedupe=" and not "?_dedupe=" which is handled in
+	// go-whosonfirst-iterate/iterator.NewIterator. This package has its
+	// own "?dedupe=" flag because we create a new iterator instance for
+	// each iterator source (which is a list of repos in an organization)
+	// and we want to deduplicate records across iterators.
 
-		v, err := strconv.ParseBool(q.Get("_dedupe"))
+	if q.Has("dedupe") {
+
+		v, err := strconv.ParseBool(q.Get("dedupe"))
 
 		if err != nil {
-			return nil, fmt.Errorf("Failed to parse '?_dedupe=' parameter, %w", err)
+			return nil, fmt.Errorf("Failed to parse '?dedupe=' parameter, %w", err)
 		}
 
 		if v {
 			em.lookup = new(sync.Map)
 			em.dedupe = v
 		}
+
 	}
 
 	return em, nil
@@ -170,7 +178,7 @@ func (em *OrganizationEmitter) WalkURI(ctx context.Context, cb emitter.EmitterCa
 
 	// To do: Add support for go-whosonfirst-iterate-github
 	// https://github.com/whosonfirst/go-whosonfirst-iterate-organization/issues/2
-	
+
 	iterator_uri := url.URL{}
 	iterator_uri.Scheme = "git"
 	iterator_uri.Path = em.target
@@ -184,10 +192,22 @@ func (em *OrganizationEmitter) WalkURI(ctx context.Context, cb emitter.EmitterCa
 
 			if em.dedupe {
 
-				_, exists := em.lookup.LoadOrStore(path, true)
+				id, uri_args, err := wof_uri.ParseURI(path)
+				
+				if err != nil {
+					return fmt.Errorf("Failed to parse %s, %w", path, err)
+				}
+				
+				rel_path, err := wof_uri.Id2RelPath(id, uri_args)
+				
+				if err != nil {
+					return fmt.Errorf("Failed to derive relative path for %s, %w", path, err)
+				}
+				
+				_, exists := em.lookup.LoadOrStore(rel_path, true)
 
 				if exists {
-					slog.Debug("Skip record because duplicate", "path", path)
+					slog.Debug("Skip record because duplicate", "path", rel_path)
 					return nil
 				}
 			}
