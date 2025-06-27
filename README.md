@@ -88,7 +88,7 @@ Generate a PMTiles database of all the records from repositories in the [sfomuse
 ```
 $> ./bin/features \
 	-writer-uri 'constant://?val=jsonl://?writer=stdout://' \
-	-iterator-uri 'org:///tmp' \
+	-iterator-uri 'githuborg:///tmp' \
 	'sfomuseum-data://?prefix=sfomuseum-data-maps' \
 	
 	| tippecanoe -zg -o sfomuseum.pmtiles
@@ -141,9 +141,9 @@ You can limit features to be included in the final output by appending filtering
 
 * https://github.com/whosonfirst/go-whosonfirst-iterate#filters
 
-#### Considerations when reading data from an `org://` iterator
+#### Considerations when reading data from an `githuborg://` iterator
 
-If you are fetching data from multiple GitHub repositories using the `org://` iterator you may want to assign the `?_max_procs=2` parameter (as in `org:///tmp?_max_procs=2`) especially if you are running the code from a machine with lots of CPUs. By default the `go-whosonfirst-iterator` code will process as many sources are there are CPUs concurrently.
+If you are fetching data from multiple GitHub repositories using the `githuborg://` iterator you may want to assign the `?_max_procs=2` parameter (as in `org:///tmp?_max_procs=2`) especially if you are running the code from a machine with lots of CPUs. By default the `go-whosonfirst-iterator` code will process as many sources are there are CPUs concurrently.
 
 Normally this is not a problem but if you are fetching very large repositories (like `whosonfirst-data-admin-us`) and, say, seven other small repositories (on an 8-CPU machine) that will cause enough network traffic that Go will eventually start emitting "STREAM" errors and the iterator will fail. 
 
@@ -157,7 +157,7 @@ Anecedotaly, generating a PMTiles database for all the `whosonfirst-data-admin-`
 
 * https://github.com/whosonfirst/go-whosonfirst-iterwriter
 * https://github.com/whosonfirst/go-whosonfirst-iterate
-* https://github.com/whosonfirst/go-whosonfirst-iterate-organization
+* https://github.com/whosonfirst/go-whosonfirst-iterate-git
 * https://github.com/whosonfirst/go-writer-featurecollection
 * https://github.com/whosonfirst/go-writer-jsonl
 * https://github.com/felt/tippecanoe
