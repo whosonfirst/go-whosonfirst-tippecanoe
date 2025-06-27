@@ -7,19 +7,20 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/go-github/v48/github"
+	"github.com/google/go-github/v71/github"
 	"github.com/whosonfirst/go-whosonfirst-github/util"
 )
 
 type ListOptions struct {
-	Prefix        []string
-	Exclude       []string
-	Forked        bool
-	NotForked     bool
-	AccessToken   string
-	PushedSince   *time.Time
-	Debug         bool
-	EnsureCommits bool
+	Prefix          []string
+	Exclude         []string
+	Forked          bool
+	NotForked       bool
+	ExcludeArchived bool
+	AccessToken     string
+	PushedSince     *time.Time
+	Debug           bool
+	EnsureCommits   bool
 }
 
 type CreateOptions struct {
@@ -32,13 +33,14 @@ type CreateOptions struct {
 func NewDefaultListOptions() *ListOptions {
 
 	opts := ListOptions{
-		Prefix:      []string{},
-		Exclude:     []string{},
-		Forked:      false,
-		NotForked:   false,
-		AccessToken: "",
-		PushedSince: nil,
-		Debug:       false,
+		Prefix:          []string{},
+		Exclude:         []string{},
+		Forked:          false,
+		NotForked:       false,
+		ExcludeArchived: false,
+		AccessToken:     "",
+		PushedSince:     nil,
+		Debug:           false,
 	}
 
 	return &opts
@@ -156,6 +158,10 @@ func ListReposWithCallback(org string, opts *ListOptions, cb func(repo *github.R
 				continue
 			}
 
+			if opts.ExcludeArchived && *r.Archived {
+				continue
+			}
+
 			if opts.PushedSince != nil {
 
 				if opts.Debug {
@@ -167,11 +173,11 @@ func ListReposWithCallback(org string, opts *ListOptions, cb func(repo *github.R
 				}
 			}
 
-			// https://pkg.go.dev/github.com/google/go-github/v48@v48.2.0/github#RepositoriesService.ListCommits
-			// https://pkg.go.dev/github.com/google/go-github/v48@v48.2.0/github#CommitsListOptions
-			// https://pkg.go.dev/github.com/google/go-github/v48@v48.2.0/github#RepositoryCommit
-			// https://pkg.go.dev/github.com/google/go-github/v48@v48.2.0/github#Commit
-			// https://pkg.go.dev/github.com/google/go-github/v48@v48.2.0/github#CommitFile
+			// https://pkg.go.dev/github.com/google/go-github/v71@v48.2.0/github#RepositoriesService.ListCommits
+			// https://pkg.go.dev/github.com/google/go-github/v71@v48.2.0/github#CommitsListOptions
+			// https://pkg.go.dev/github.com/google/go-github/v71@v48.2.0/github#RepositoryCommit
+			// https://pkg.go.dev/github.com/google/go-github/v71@v48.2.0/github#Commit
+			// https://pkg.go.dev/github.com/google/go-github/v71@v48.2.0/github#CommitFile
 
 			if opts.EnsureCommits {
 

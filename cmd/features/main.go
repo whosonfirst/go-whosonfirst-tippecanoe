@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	_ "github.com/whosonfirst/go-whosonfirst-iterate-organization/v2"
+	_ "github.com/whosonfirst/go-whosonfirst-iterate-git/v3/github"
 	_ "github.com/whosonfirst/go-writer-featurecollection/v3"
 	_ "github.com/whosonfirst/go-writer-jsonl/v3"
 
