@@ -12,7 +12,7 @@ import (
 	_ "gocloud.dev/runtimevar/constantvar"
 	_ "gocloud.dev/runtimevar/filevar"
 
-	"github.com/aaronland/go-aws-auth"
+	"github.com/aaronland/go-aws-auth/v2"
 	"github.com/aaronland/gocloud-blob/bucket"
 	gc "gocloud.dev/runtimevar"
 	"gocloud.dev/runtimevar/awsparamstore"

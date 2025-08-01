@@ -184,6 +184,8 @@ func (it *OrganizationIterator) Iterate(ctx context.Context, uris ...string) ite
 			repos, err := organizations.ListRepos(organization, list_opts)
 
 			if err != nil {
+
+				logger.Error("Failed to list repos", "error", err)
 				if !yield(nil, fmt.Errorf("Failed to list repos, %w", err)) {
 					return
 				}
@@ -194,7 +196,10 @@ func (it *OrganizationIterator) Iterate(ctx context.Context, uris ...string) ite
 			iterator_sources := make([]string, len(repos))
 
 			for idx, repo := range repos {
-				iterator_sources[idx] = fmt.Sprintf("https://github.com/%s/%s.git", organization, repo)
+				source_uri := fmt.Sprintf("https://github.com/%s/%s.git", organization, repo)
+				logger.Debug("Register iterator source", "uri", source_uri)
+				
+				iterator_sources[idx] = source_uri
 			}
 
 			//
@@ -214,9 +219,6 @@ func (it *OrganizationIterator) Iterate(ctx context.Context, uris ...string) ite
 				iter_q.Set("_retry_after", strconv.Itoa(retry_after))
 			}
 
-			// To do: Add support for go-whosonfirst-iterate-github
-			// https://github.com/whosonfirst/go-whosonfirst-iterate-organization/issues/2
-
 			iterator_uri := url.URL{}
 			iterator_uri.Scheme = "git"
 			iterator_uri.Path = it.target
@@ -235,6 +237,9 @@ func (it *OrganizationIterator) Iterate(ctx context.Context, uris ...string) ite
 			for rec, err := range iter.Iterate(ctx, iterator_sources...) {
 
 				if err != nil {
+
+					logger.Error("Iterator returned an error", "error", err)
+					
 					if !yield(nil, err) {
 						return
 					}
@@ -246,6 +251,8 @@ func (it *OrganizationIterator) Iterate(ctx context.Context, uris ...string) ite
 					id, uri_args, err := wof_uri.ParseURI(rec.Path)
 
 					if err != nil {
+
+						logger.Error("Failed to parse URI", "path", rec.Path, "error", err)
 						if !yield(nil, fmt.Errorf("Failed to parse %s, %w", rec.Path, err)) {
 							return
 						}
@@ -256,6 +263,8 @@ func (it *OrganizationIterator) Iterate(ctx context.Context, uris ...string) ite
 					rel_path, err := wof_uri.Id2RelPath(id, uri_args)
 
 					if err != nil {
+
+						logger.Error("Failed to derive relative path for URI", "path", rec.Path, "error", err)
 						if !yield(nil, fmt.Errorf("Failed to derive relative path for %s, %w", rec.Path, err)) {
 							return
 						}
@@ -266,7 +275,7 @@ func (it *OrganizationIterator) Iterate(ctx context.Context, uris ...string) ite
 					_, exists := it.lookup.LoadOrStore(rel_path, true)
 
 					if exists {
-						slog.Debug("Skip record because duplicate", "path", rel_path)
+						logger.Debug("Skip record because duplicate", "path", rel_path)
 						continue
 					}
 				}
