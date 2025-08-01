@@ -234,8 +234,8 @@ github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 h1:n661drycOFuPLCN
 github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3/go.mod h1:A0bzQcvG0E7Rwjx0REVgAGH58e96+X0MeOfepqsbeW4=
 github.com/sfomuseum/go-edtf v1.1.1 h1:R5gElndHGDaK/rGSh2X+ulaLtlcHCdQA1cTzB8e9wv8=
 github.com/sfomuseum/go-edtf v1.1.1/go.mod h1:1rP0EJZ/84j3HO80vGcnG2T9MFBDAFyTNtjrr8cv3T4=
-github.com/sfomuseum/go-flags v0.10.0 h1:1OC1ACxpWMsl3XQ9OeNVMQj7Zi2CzufP3Rym3mPI8HU=
-github.com/sfomuseum/go-flags v0.10.0/go.mod h1:VXOnnX1/yxQpX2yiwHaBV6aCmhtszQOL5bL1/nNo3co=
+github.com/sfomuseum/go-flags v0.11.0 h1:HmMm5DgLxgz8iaNsvJ79dyRXjuAyX/fruqkBeHmopL0=
+github.com/sfomuseum/go-flags v0.11.0/go.mod h1:cUTByyudaM9d+iHwxsEpyYHemWVOGL/bqTRPIvydiC8=
 github.com/sfomuseum/go-timings v1.4.0 h1:48TyPhrSlTVbFKI2psZiPD11GA0zXnrPJAyLmtBBmPg=
 github.com/sfomuseum/go-timings v1.4.0/go.mod h1:FcDhHe439Uy6i+WpLHrTJirtv37sf6/TxBhAngUQP7M=
 github.com/sfomuseum/iso8601duration v1.1.0 h1:kMYzbamrZp9dRxi5iFuhjl5CzHXK6s6Bzz/c75wsq8Q=
@@ -276,8 +276,8 @@ github.com/whosonfirst/go-whosonfirst-github v0.9.1 h1:Z6JWtvfy8TGvHk8NSpOAs0p3Y
 github.com/whosonfirst/go-whosonfirst-github v0.9.1/go.mod h1:g4RTkkjN4L+QmHml+ye66EHQVVeCuZEc9FzKpYXmfZg=
 github.com/whosonfirst/go-whosonfirst-iterate-git/v3 v3.0.1 h1:vwbjWguS0rGlGdhwg9YDkFcqsCVlHUeZEvn1xNPIHuU=
 github.com/whosonfirst/go-whosonfirst-iterate-git/v3 v3.0.1/go.mod h1:SlqAPXJQd5N6FKP3ROTdyWjLNERr2DrTHiZlwGaH9ws=
-github.com/whosonfirst/go-whosonfirst-iterate/v3 v3.0.0 h1:9W1VYn8F9OeRD6o7IGj1zCw1gPVM5tcYg7wCNUgxdmQ=
-github.com/whosonfirst/go-whosonfirst-iterate/v3 v3.0.0/go.mod h1:8L1KzWtOnRue6Dvc9BI6hy4twHd6zu9XgKn8TlJ4d7g=
+github.com/whosonfirst/go-whosonfirst-iterate/v3 v3.1.0 h1:NE5HkwKuHqO+clCGNP5QY2pxblg02mGFeX8lFQ0K5Ho=
+github.com/whosonfirst/go-whosonfirst-iterate/v3 v3.1.0/go.mod h1:8L1KzWtOnRue6Dvc9BI6hy4twHd6zu9XgKn8TlJ4d7g=
 github.com/whosonfirst/go-whosonfirst-iterwriter/v4 v4.0.0 h1:hxqJ1V3Z5Ht1pNxo3rPGR35m1pUQHpOrkUmRK0WSgRU=
 github.com/whosonfirst/go-whosonfirst-iterwriter/v4 v4.0.0/go.mod h1:MuZowaG0a9XR5FBIwHGFNbXVltie1KkvfhF/rFfBYzY=
 github.com/whosonfirst/go-whosonfirst-sources v0.1.0 h1:JuKLa6KWke22jBfJ1pM9WQHoz1/3pbDv2C+aR+THPPQ=
