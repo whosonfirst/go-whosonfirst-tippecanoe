@@ -443,15 +443,15 @@ github.com/whosonfirst/go-whosonfirst-flags/existential
 ## explicit; go 1.24.2
 github.com/whosonfirst/go-whosonfirst-github/organizations
 github.com/whosonfirst/go-whosonfirst-github/util
-# github.com/whosonfirst/go-whosonfirst-iterate-git/v3 v3.0.2
-## explicit; go 1.24.2
+# github.com/whosonfirst/go-whosonfirst-iterate-git/v3 v3.0.4
+## explicit; go 1.24.5
 github.com/whosonfirst/go-whosonfirst-iterate-git/v3
 github.com/whosonfirst/go-whosonfirst-iterate-git/v3/github
-# github.com/whosonfirst/go-whosonfirst-iterate/v3 v3.1.0
+# github.com/whosonfirst/go-whosonfirst-iterate/v3 v3.1.1
 ## explicit; go 1.24
 github.com/whosonfirst/go-whosonfirst-iterate/v3
 github.com/whosonfirst/go-whosonfirst-iterate/v3/filters
-# github.com/whosonfirst/go-whosonfirst-iterwriter/v4 v4.0.0
+# github.com/whosonfirst/go-whosonfirst-iterwriter/v4 v4.0.1
 ## explicit; go 1.24.0
 github.com/whosonfirst/go-whosonfirst-iterwriter/v4
 github.com/whosonfirst/go-whosonfirst-iterwriter/v4/app/iterwriter

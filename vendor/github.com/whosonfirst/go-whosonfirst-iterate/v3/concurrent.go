@@ -217,9 +217,10 @@ func (it *concurrentIterator) Iterate(ctx context.Context, uris ...string) iter.
 			go func(uri string) {
 
 				logger := slog.Default()
-				logger = logger.With("uri", uri)
-
 				t2 := time.Now()
+
+				var it_counter int64
+				attempts := 0
 
 				defer func() {
 					logger.Debug("Time to iterate uri", "time", time.Since(t2))
@@ -232,6 +233,17 @@ func (it *concurrentIterator) Iterate(ctx context.Context, uris ...string) iter.
 					done_ch <- true
 				}()
 
+				logger_uri, err := ScrubURI(uri)
+
+				if err != nil {
+					slog.Error("Failed to scrub URI", "error", err)
+					return
+				}
+
+				logger = logger.With("uri", logger_uri)
+
+				// END OF put me in a funciton somewhere...
+
 				select {
 				case <-ctx.Done():
 					return
@@ -239,36 +251,43 @@ func (it *concurrentIterator) Iterate(ctx context.Context, uris ...string) iter.
 					// pass
 				}
 
-				// The number of records processed across all attempts (it.max_attempts)
-				it_counter := int64(0)
-				attempts := 0
+				atomic.StoreInt64(&it_counter, 0)
 
-				do_iter := func() error {
+				do_iter := func(target_uri string) error {
+
+					logger_uri, err := ScrubURI(target_uri)
+
+					if err != nil {
+						return err
+					}
 
 					// The number of records processed in this attempt
-					local_counter := int64(1)
+					var local_counter int64
+					atomic.StoreInt64(&local_counter, 0)
 
-					for rec, err := range it.iterator.Iterate(ctx, uri) {
+					logger.Debug("Iterate target", "target uri", logger_uri, "counter", atomic.LoadInt64(&it_counter), "local counter", atomic.LoadInt64(&local_counter))
+
+					for rec, err := range it.iterator.Iterate(ctx, target_uri) {
 
 						if err != nil {
-							logger.Error("Iterator failed", "counter", it_counter, "local counter", local_counter, "error", err)
+							logger.Error("Iterator failed", "counter", atomic.LoadInt64(&it_counter), "local counter", atomic.LoadInt64(&local_counter), "error", err)
 							return err
 						}
 
-						if it_counter > local_counter {
-							logger.Debug("Local counter < counter, skipping", "counter", it_counter, "local counter", local_counter)
-							local_counter += 1
+						if atomic.LoadInt64(&it_counter) > atomic.LoadInt64(&local_counter) {
+							logger.Debug("Iterator counter > local counter, skipping", "path", rec.Path, "counter", atomic.LoadInt64(&it_counter), "local counter", atomic.LoadInt64(&local_counter))
+							atomic.AddInt64(&local_counter, 1)
 							continue
 						}
 
-						local_counter += 1
-						it_counter += 1
-
+						atomic.AddInt64(&local_counter, 1)
+						atomic.AddInt64(&it_counter, 1)
 						atomic.AddInt64(&it.seen, 1)
 
 						ok, err := it.shouldYieldRecord(ctx, rec)
 
 						if err != nil {
+							logger.Warn("Failed to determine if record should yield", "path", rec.Path, "error", err)
 							continue
 						}
 
@@ -277,7 +296,6 @@ func (it *concurrentIterator) Iterate(ctx context.Context, uris ...string) iter.
 							continue
 						}
 
-						logger.Debug("Yield record", "counter", it_counter, "local counter", local_counter, "path", rec.Path)
 						rec_ch <- rec
 					}
 
@@ -286,10 +304,15 @@ func (it *concurrentIterator) Iterate(ctx context.Context, uris ...string) iter.
 
 				for attempts < it.max_attempts {
 
-					attempts += 1
-					err := do_iter()
+					logger.Debug("Do iter", "attempt", attempts, "max attempts", it.max_attempts, "counter", atomic.LoadInt64(&it_counter))
 
-					if err != nil {
+					attempts += 1
+					err := do_iter(uri)
+
+					if err == nil {
+						logger.Debug("Iteration successful", "attempt", attempts, "max attempts", it.max_attempts, "counter", atomic.LoadInt64(&it_counter))
+						break
+					} else {
 
 						logger.Error("Iterator failed", "attempts", attempts, "max attempts", it.max_attempts, "error", err)
 
