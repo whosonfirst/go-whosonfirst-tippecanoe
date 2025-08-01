@@ -216,9 +216,7 @@ func (it *concurrentIterator) Iterate(ctx context.Context, uris ...string) iter.
 
 			go func(uri string) {
 
-				logger := slog.Default()
-				logger = logger.With("uri", uri)
-
+				logger := slog.Default()				
 				t2 := time.Now()
 
 				defer func() {
@@ -232,6 +230,17 @@ func (it *concurrentIterator) Iterate(ctx context.Context, uris ...string) iter.
 					done_ch <- true
 				}()
 
+				logger_uri, err := ScrubURI(uri)
+
+				if err != nil {
+					slog.Error("Failed to scrub URI", "error", err)
+					return
+				}
+				
+				logger = logger.With("uri", logger_uri)
+
+				// END OF put me in a funciton somewhere...
+				
 				select {
 				case <-ctx.Done():
 					return
@@ -243,11 +252,13 @@ func (it *concurrentIterator) Iterate(ctx context.Context, uris ...string) iter.
 				it_counter := int64(0)
 				attempts := 0
 
-				do_iter := func() error {
+				do_iter := func(uri string) error {
 
 					// The number of records processed in this attempt
 					local_counter := int64(1)
 
+					logger.Debug("Iterate target", "uri", uri, "counter", it_counter, "local counter", local_counter)
+					
 					for rec, err := range it.iterator.Iterate(ctx, uri) {
 
 						if err != nil {
@@ -256,7 +267,7 @@ func (it *concurrentIterator) Iterate(ctx context.Context, uris ...string) iter.
 						}
 
 						if it_counter > local_counter {
-							logger.Debug("Local counter < counter, skipping", "counter", it_counter, "local counter", local_counter)
+							logger.Debug("Iterator counter > local counter, skipping", "path", rec.Path, "counter", it_counter, "local counter", local_counter)
 							local_counter += 1
 							continue
 						}
@@ -269,6 +280,7 @@ func (it *concurrentIterator) Iterate(ctx context.Context, uris ...string) iter.
 						ok, err := it.shouldYieldRecord(ctx, rec)
 
 						if err != nil {
+							logger.Warn("Failed to determine if record should yield", "path", rec.Path, "error", err)
 							continue
 						}
 
@@ -277,7 +289,6 @@ func (it *concurrentIterator) Iterate(ctx context.Context, uris ...string) iter.
 							continue
 						}
 
-						logger.Debug("Yield record", "counter", it_counter, "local counter", local_counter, "path", rec.Path)
 						rec_ch <- rec
 					}
 
@@ -287,7 +298,7 @@ func (it *concurrentIterator) Iterate(ctx context.Context, uris ...string) iter.
 				for attempts < it.max_attempts {
 
 					attempts += 1
-					err := do_iter()
+					err := do_iter(uri)
 
 					if err != nil {
 
