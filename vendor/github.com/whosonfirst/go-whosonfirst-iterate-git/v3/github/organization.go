@@ -107,10 +107,10 @@ func (it *OrganizationIterator) Iterate(ctx context.Context, uris ...string) ite
 			logger_uri, err := iterate.ScrubURI(uri)
 
 			if err != nil {
-				logger.Error("Failed to scrub URI, skipping", "error", err)
+				logger.Error("Failed to scrub (logger) URI", "error", err)
 				continue
 			}
-				
+
 			logger = logger.With("uri", logger_uri)
 
 			u, err := url.Parse(uri)
@@ -206,7 +206,6 @@ func (it *OrganizationIterator) Iterate(ctx context.Context, uris ...string) ite
 			for idx, repo := range repos {
 				source_uri := fmt.Sprintf("https://github.com/%s/%s.git", organization, repo)
 				logger.Debug("Register iterator source", "source", source_uri)
-				
 				iterator_sources[idx] = source_uri
 			}
 
@@ -247,7 +246,7 @@ func (it *OrganizationIterator) Iterate(ctx context.Context, uris ...string) ite
 				if err != nil {
 
 					logger.Error("Iterator returned an error", "error", err)
-					
+
 					if !yield(nil, err) {
 						return
 					}

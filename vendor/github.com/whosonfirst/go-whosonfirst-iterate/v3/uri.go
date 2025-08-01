@@ -12,23 +12,23 @@ func ScrubURI(uri string) (string, error) {
 	to_scrub := []string{
 		"access_token",
 	}
-	
+
 	u, err := url.Parse(uri)
-	
+
 	if err != nil {
 		return "", fmt.Errorf("Failed to parse URI, %w", err)
 	}
-	
+
 	q := u.Query()
 
 	for _, k := range to_scrub {
-		
-		if q.Has(k){
+
+		if q.Has(k) {
 			q.Del(k)
 			q.Set(k, "...")
 		}
 	}
-	
+
 	u.RawQuery = q.Encode()
 	return u.String(), nil
 }
