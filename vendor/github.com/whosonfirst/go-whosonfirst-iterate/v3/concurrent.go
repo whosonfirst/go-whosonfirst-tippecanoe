@@ -307,6 +307,7 @@ func (it *concurrentIterator) Iterate(ctx context.Context, uris ...string) iter.
 						if atomic.LoadInt64(&it_counter) > atomic.LoadInt64(&local_counter) {
 							logger.Debug("Iterator counter > local counter, skipping", "path", rec.Path, "counter", atomic.LoadInt64(&it_counter), "local counter", atomic.LoadInt64(&local_counter))
 							atomic.AddInt64(&local_counter, 1)
+							rec.Body.Close()
 							continue
 						}
 
@@ -318,6 +319,7 @@ func (it *concurrentIterator) Iterate(ctx context.Context, uris ...string) iter.
 
 						if err != nil {
 							logger.Warn("Failed to determine if record should yield", "path", rec.Path, "error", err)
+							rec.Body.Close()							
 							continue
 						}
 
@@ -356,6 +358,9 @@ func (it *concurrentIterator) Iterate(ctx context.Context, uris ...string) iter.
 					}
 				}
 
+				logger.Info("Garbare collect")
+				runtime.GC()
+				
 			}(uri)
 		}
 
@@ -375,7 +380,6 @@ func (it *concurrentIterator) Iterate(ctx context.Context, uris ...string) iter.
 				// pass
 			}
 		}
-
 	}
 }
 
