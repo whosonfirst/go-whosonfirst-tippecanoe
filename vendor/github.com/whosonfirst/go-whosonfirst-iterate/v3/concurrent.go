@@ -199,7 +199,8 @@ func (it *concurrentIterator) Iterate(ctx context.Context, uris ...string) iter.
 		defer func(){
 			ticker_done <- true
 		}()
-		
+
+		go func(){
 		for {
 			select {
 			case <-ticker_done:
@@ -212,6 +213,7 @@ func (it *concurrentIterator) Iterate(ctx context.Context, uris ...string) iter.
 				slog.Info("Stats", "seen", it.Seen(), "allocated",  bToMb(m.Alloc), "total allocated", bToMb(m.TotalAlloc), "sys", bToMb(m.Sys), "numgc",  m.NumGC)
 			}
 		}
+		}()
 		
 		// 
 		
