@@ -182,15 +182,43 @@ func NewConcurrentIterator(ctx context.Context, iterator_uri string, it Iterator
 	return i, nil
 }
 
+func bToMb(b uint64) float64 {
+	return float64(b) / (1024 * 1024)
+}
+
 // Iterate will return an `iter.Seq2[*Record, error]` for each record encountered in 'uris'.
 func (it *concurrentIterator) Iterate(ctx context.Context, uris ...string) iter.Seq2[*Record, error] {
 
 	return func(yield func(rec *Record, err error) bool) {
 
+		ticker := time.NewTicker(1 * time.Minute)
+		
+		defer ticker.Stop()
+		ticker_done := make(chan bool)
+
+		defer func(){
+			ticker_done <- true
+		}()
+		
+		for {
+			select {
+			case <-ticker_done:
+				return
+			case <-ticker.C:
+
+				var m runtime.MemStats
+				runtime.ReadMemStats(&m)
+
+				slog.Info("Stats", "seen", it.Seen(), "allocated",  bToMb(m.Alloc), "total allocated", bToMb(m.TotalAlloc), "sys", bToMb(m.Sys), "numgc",  m.NumGC)
+			}
+		}
+		
+		// 
+		
 		t1 := time.Now()
 
 		defer func() {
-			slog.Debug("Time to process paths", "count", len(uris), "time", time.Since(t1))
+			slog.Debug("Time to process paths", "count", len(uris), "seen", it.Seen(), "time", time.Since(t1))
 		}()
 
 		it.iterating.Swap(true)
