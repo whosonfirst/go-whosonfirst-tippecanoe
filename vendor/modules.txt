@@ -448,7 +448,7 @@ github.com/whosonfirst/go-whosonfirst-iterate-git/v3/github
 ## explicit; go 1.24
 github.com/whosonfirst/go-whosonfirst-iterate/v3
 github.com/whosonfirst/go-whosonfirst-iterate/v3/filters
-# github.com/whosonfirst/go-whosonfirst-iterwriter/v4 v4.0.2
+# github.com/whosonfirst/go-whosonfirst-iterwriter/v4 v4.0.3
 ## explicit; go 1.24.0
 github.com/whosonfirst/go-whosonfirst-iterwriter/v4
 github.com/whosonfirst/go-whosonfirst-iterwriter/v4/app/iterwriter

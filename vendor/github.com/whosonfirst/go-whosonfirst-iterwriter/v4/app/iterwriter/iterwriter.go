@@ -88,10 +88,10 @@ func RunWithOptions(ctx context.Context, opts *RunOptions) error {
 			return err
 		}
 
-		defer rec.Body.Close()
-
 		err = opts.CallbackFunc(ctx, rec, mw)
 
+		rec.Body.Close()
+		
 		if err != nil {
 			return err
 		}
